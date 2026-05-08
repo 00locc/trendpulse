@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>TrendPulse — What the World Wants</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Outfit:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="css/style.css"/>
+  <link rel="stylesheet" href="css/digital.css"/>
+</head>
+<body>
+<div class="noise"></div>
+
+<aside class="sidebar">
+  <div class="logo">
+    <div class="logo-icon"><svg viewBox="0 0 24 24" fill="none"><polyline points="2,17 8,11 12,15 18,7 22,10" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="22" cy="10" r="2" fill="var(--accent)"/></svg></div>
+    <span class="logo-text">Trend<em>Pulse</em></span>
+  </div>
+  <nav class="nav">
+    <div class="nav-label">Overview</div>
+    <a href="#" class="nav-item active" data-view="dashboard"><svg viewBox="0 0 20 20" fill="none"><rect x="2" y="2" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="1.5"/><rect x="11" y="2" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="1.5"/><rect x="2" y="11" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="1.5"/><rect x="11" y="11" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="1.5"/></svg>Dashboard</a>
+    <a href="#" class="nav-item" data-view="alerts"><svg viewBox="0 0 20 20" fill="none"><path d="M10 2a6 6 0 0 1 6 6c0 3.5 1.5 5 1.5 5h-15S4 11.5 4 8a6 6 0 0 1 6-6z" stroke="currentColor" stroke-width="1.5"/><path d="M8.3 17a2 2 0 0 0 3.4 0" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>Spike Alerts</a>
+
+    <div class="nav-label" style="color:var(--accent);border-left:2px solid var(--accent);padding-left:6px;margin-left:-6px;">⭐ For Creators</div>
+    <a href="#" class="nav-item nav-item-star" data-view="digital"><svg viewBox="0 0 20 20" fill="none"><path d="M4 14V7a6 6 0 0 1 12 0v7" stroke="currentColor" stroke-width="1.5"/><rect x="2" y="13" width="16" height="5" rx="1.5" stroke="currentColor" stroke-width="1.5"/><path d="M8 13v-2a2 2 0 0 1 4 0v2" stroke="currentColor" stroke-width="1.2"/></svg>Digital Products</a>
+
+    <div class="nav-label">Discover</div>
+    <a href="#" class="nav-item" data-view="topics"><svg viewBox="0 0 20 20" fill="none"><path d="M3 5h14M3 10h10M3 15h7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>All Topics</a>
+    <a href="#" class="nav-item" data-view="questions"><svg viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="7.5" stroke="currentColor" stroke-width="1.5"/><path d="M8 8c0-1.1.9-2 2-2s2 .9 2 2c0 1-.6 1.6-1.3 2-.4.3-.7.7-.7 1.2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><circle cx="10" cy="14.5" r="0.75" fill="currentColor"/></svg>Questions</a>
+    <a href="#" class="nav-item" data-view="products"><svg viewBox="0 0 20 20" fill="none"><path d="M3 3h2l2.4 9.6A2 2 0 0 0 9.3 14H16a2 2 0 0 0 1.9-1.4L19 7H6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><circle cx="9" cy="17.5" r="1.5" fill="currentColor"/><circle cx="16" cy="17.5" r="1.5" fill="currentColor"/></svg>Products</a>
+
+    <div class="nav-label">Platforms</div>
+    <a href="#" class="nav-item" data-view="youtube"><svg viewBox="0 0 20 20" fill="none"><rect x="2" y="4" width="16" height="12" rx="2.5" stroke="currentColor" stroke-width="1.5"/><path d="M8 8l5 2.5L8 13V8z" fill="currentColor"/></svg>YouTube</a>
+    <a href="#" class="nav-item" data-view="news"><svg viewBox="0 0 20 20" fill="none"><rect x="2" y="3" width="16" height="14" rx="2" stroke="currentColor" stroke-width="1.5"/><path d="M6 7h8M6 10h8M6 13h5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>News</a>
+    <a href="#" class="nav-item" data-view="github"><svg viewBox="0 0 20 20" fill="none"><path d="M10 2C5.6 2 2 5.6 2 10c0 3.5 2.3 6.5 5.5 7.6.4.1.5-.2.5-.4v-1.4c-2.2.5-2.7-1.1-2.7-1.1-.4-.9-.9-1.2-.9-1.2-.7-.5.1-.5.1-.5.8.1 1.2.8 1.2.8.7 1.2 1.9.9 2.3.7.1-.5.3-.9.5-1.1-1.8-.2-3.6-.9-3.6-4 0-.9.3-1.6.8-2.1-.1-.2-.4-1 .1-2.1 0 0 .7-.2 2.2.8.6-.2 1.3-.3 2-.3s1.4.1 2 .3c1.5-1 2.2-.8 2.2-.8.4 1.1.2 1.9.1 2.1.5.6.8 1.3.8 2.1 0 3.1-1.9 3.8-3.7 4 .3.3.6.8.6 1.6v2.3c0 .2.1.5.5.4C15.7 16.5 18 13.5 18 10c0-4.4-3.6-8-8-8z" fill="currentColor"/></svg>GitHub</a>
+    <a href="#" class="nav-item" data-view="devto"><svg viewBox="0 0 20 20" fill="none"><rect x="2" y="4" width="16" height="12" rx="2" stroke="currentColor" stroke-width="1.5"/><path d="M6 8h2.5c1 0 1.5.5 1.5 2s-.5 2-1.5 2H6V8zM12 8h2M12 10h2M12 12h1" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>DEV.to</a>
+    <a href="#" class="nav-item" data-view="stackoverflow"><svg viewBox="0 0 20 20" fill="none"><path d="M5 13h10v4H5z" stroke="currentColor" stroke-width="1.5"/><path d="M7 11l8-2M8 8l7-4M10 6l5-6" stroke="var(--orange)" stroke-width="1.2" stroke-linecap="round"/></svg>Stack Overflow</a>
+
+    <div class="nav-label">Markets</div>
+    <a href="#" class="nav-item" data-view="crypto"><svg viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="7.5" stroke="currentColor" stroke-width="1.5"/><path d="M8 7h3c1 0 1.5.5 1.5 1.5S12 10 11 10H8M8 10h3.5c1 0 1.5.5 1.5 1.5S12.5 13 11.5 13H8" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/><path d="M10 6v1M10 13v1" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>Crypto</a>
+    <a href="#" class="nav-item" data-view="jobs"><svg viewBox="0 0 20 20" fill="none"><rect x="3" y="7" width="14" height="10" rx="1.5" stroke="currentColor" stroke-width="1.5"/><path d="M7 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2M3 11h14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>Remote Jobs</a>
+    <a href="#" class="nav-item" data-view="books"><svg viewBox="0 0 20 20" fill="none"><path d="M4 3h12a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1z" stroke="currentColor" stroke-width="1.5"/><path d="M7 3v14M10 7h4M10 10h4M10 13h2" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>Books</a>
+  </nav>
+  <div class="sidebar-bottom">
+    <div class="api-status">
+      <div class="status-label">Live Sources</div>
+      <div class="status-row"><span class="dot green"></span>Reddit · HN · Wikipedia</div>
+      <div class="status-row"><span class="dot green"></span>GitHub · DEV.to · SO</div>
+      <div class="status-row"><span class="dot green"></span>CoinGecko · Open Library</div>
+      <div class="status-row"><span class="dot green"></span>Amazon/Etsy signals</div>
+      <div class="status-row"><span class="dot yellow"></span>YouTube (key needed)</div>
+      <div class="status-row"><span class="dot yellow"></span>NewsAPI (key needed)</div>
+      <div class="status-row"><span class="dot yellow"></span>Google Trends (backend)</div>
+    </div>
+    <button class="settings-btn" onclick="showSettings()">⚙ API Keys</button>
+  </div>
+</aside>
+
+<main class="main">
+  <header class="topbar">
+    <div class="topbar-left">
+      <div class="page-title" id="pageTitle">Dashboard</div>
+      <div class="page-sub">Live signals · Updated <span id="lastUpdated">now</span></div>
+    </div>
+    <div class="topbar-right">
+      <div class="search-wrap">
+        <svg viewBox="0 0 20 20" fill="none" width="14" height="14"><circle cx="9" cy="9" r="6" stroke="currentColor" stroke-width="1.5"/><path d="M14 14l3.5 3.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        <input type="text" id="searchInput" placeholder="Search topics, products, questions..." />
+      </div>
+      <div class="time-tabs">
+        <button class="tt active" data-range="24h">24h</button>
+        <button class="tt" data-range="7d">7d</button>
+        <button class="tt" data-range="30d">30d</button>
+      </div>
+      <button class="refresh-btn" id="refreshBtn" onclick="refreshAll()">
+        <svg viewBox="0 0 20 20" fill="none" width="14"><path d="M17 10A7 7 0 1 1 10 3v2.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><polyline points="10,1 10,5.5 14,3.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Refresh
+      </button>
+    </div>
+  </header>
+
+  <div class="views">
+
+    <!-- DASHBOARD -->
+    <section class="view active" id="view-dashboard">
+      <div class="metrics-row">
+        <div class="metric-card"><div class="metric-label">Total Signals</div><div class="metric-value" id="m-signals">—</div><div class="metric-delta up" id="m-signals-delta">Loading...</div></div>
+        <div class="metric-card accent-blue"><div class="metric-label">Topics Found</div><div class="metric-value" id="m-topics">—</div><div class="metric-delta up" id="m-topics-delta">Loading...</div></div>
+        <div class="metric-card accent-green"><div class="metric-label">Products in Demand</div><div class="metric-value" id="m-products">—</div><div class="metric-delta up" id="m-products-delta">Loading...</div></div>
+        <div class="metric-card accent-orange"><div class="metric-label">Questions Asked</div><div class="metric-value" id="m-questions">—</div><div class="metric-delta up" id="m-questions-delta">Loading...</div></div>
+      </div>
+      <div class="dashboard-grid">
+        <div class="panel chart-panel">
+          <div class="panel-header"><div class="panel-title">Signal Volume Over Time</div><div class="panel-legend" id="chartLegend"></div></div>
+          <div style="position:relative;height:200px;width:100%;"><canvas id="volumeChart"></canvas></div>
+        </div>
+        <div class="panel">
+          <div class="panel-header"><div class="panel-title">Platform Breakdown</div></div>
+          <div style="position:relative;height:180px;"><canvas id="platformChart"></canvas></div>
+          <div class="platform-list" id="platformList"></div>
+        </div>
+      </div>
+      <div class="dash-panels">
+        <div class="panel"><div class="panel-header"><div class="panel-title">🔥 Google Trending</div><span class="panel-tag">Live</span></div><div class="trend-list" id="trendingList"><div class="loading-state">Loading...</div></div></div>
+        <div class="panel"><div class="panel-header"><div class="panel-title">💻 Hacker News</div><span class="panel-tag">Tech</span></div><div class="trend-list" id="hnList"><div class="loading-state">Loading...</div></div></div>
+        <div class="panel"><div class="panel-header"><div class="panel-title">📖 Wikipedia Today</div><span class="panel-tag">Now</span></div><div class="trend-list" id="wikiList"><div class="loading-state">Loading...</div></div></div>
+        <div class="panel"><div class="panel-header"><div class="panel-title">🚀 Product Hunt</div><span class="panel-tag">Today</span></div><div class="trend-list" id="phList"><div class="loading-state">Loading...</div></div></div>
+        <div class="panel"><div class="panel-header"><div class="panel-title">💰 Crypto Trending</div><span class="panel-tag">CoinGecko</span></div><div class="trend-list" id="cryptoList"><div class="loading-state">Loading...</div></div></div>
+        <div class="panel"><div class="panel-header"><div class="panel-title">🛒 Hot Products</div><span class="panel-tag">Reddit</span></div><div class="trend-list" id="productsList"><div class="loading-state">Loading...</div></div></div>
+        <div class="panel"><div class="panel-header"><div class="panel-title">❓ Top Questions</div><span class="panel-tag">Today</span></div><div class="trend-list" id="questionsList"><div class="loading-state">Loading...</div></div></div>
+      </div>
+    </section>
+
+    <!-- ★ DIGITAL PRODUCTS — Main feature -->
+    <section class="view" id="view-digital">
+      <div class="view-header">
+        <h2>Digital Products Intelligence</h2>
+        <p class="view-desc">Find exactly what PDFs, ebooks, templates and guides people are searching for and buying right now. Use this to pick your next winning digital product.</p>
+      </div>
+      <div id="digitalContainer"><div class="loading-state full">Analyzing demand signals from Amazon, Etsy, Reddit, and Google...</div></div>
+    </section>
+
+    <section class="view" id="view-topics">
+      <div class="view-header"><h2>Topic Explorer</h2><p class="view-desc">Google + Reddit (120+ subs) + Hacker News + Wikipedia + DEV.to + GitHub — all in one place.</p>
+        <div class="filter-row">
+          <select id="topicCategory" onchange="State._loaded['topics']=false;loadTopics()"><option value="all">All Categories</option><option value="technology">Technology</option><option value="health">Health</option><option value="finance">Finance</option><option value="entertainment">Entertainment</option><option value="food">Food</option><option value="travel">Travel</option><option value="lifestyle">Lifestyle</option></select>
+          <select id="topicSource" onchange="State._loaded['topics']=false;loadTopics()"><option value="all">All Sources</option><option value="google">Google Trends</option><option value="reddit">Reddit</option><option value="hn">Hacker News</option><option value="wikipedia">Wikipedia</option><option value="devto">DEV.to</option><option value="github">GitHub</option></select>
+        </div>
+      </div>
+      <div class="topics-grid" id="topicsGrid"><div class="loading-state full">Loading...</div></div>
+    </section>
+
+    <section class="view" id="view-products">
+      <div class="view-header"><h2>Product Demand Intelligence</h2><p class="view-desc">What people are actively buying, recommending and searching for — extracted from Reddit, Product Hunt, and shopping signals.</p></div>
+      <div id="productsGrid"><div class="loading-state full">Loading...</div></div>
+    </section>
+
+    <section class="view" id="view-questions">
+      <div class="view-header"><h2>What People Are Asking</h2><p class="view-desc">Real questions from Reddit, Hacker News, and Stack Overflow. Sorted by engagement.</p>
+        <div class="filter-row"><select id="intentFilter" onchange="State._loaded['questions']=false;loadQuestions()"><option value="all">All Intents</option><option value="how">How-to</option><option value="what">Informational</option><option value="best">Best-of</option><option value="buy">Purchase Intent</option><option value="why">Conceptual</option></select></div>
+      </div>
+      <div class="questions-container" id="questionsContainer"><div class="loading-state full">Loading...</div></div>
+    </section>
+
+    <section class="view" id="view-youtube"><div class="view-header"><h2>YouTube Trends</h2><p class="view-desc">Trending videos across categories. Add your free YouTube API key in ⚙ API Keys.</p></div><div id="youtubeContainer"><div class="loading-state full">Loading...</div></div></section>
+    <section class="view" id="view-news"><div class="view-header"><h2>News & Headlines</h2><p class="view-desc">Hacker News (live) + NewsAPI. Add your free NewsAPI key in ⚙ API Keys.</p></div><div id="newsContainer"><div class="loading-state full">Loading...</div></div></section>
+    <section class="view" id="view-github"><div class="view-header"><h2>GitHub Trending</h2><p class="view-desc">What developers are building right now.</p></div><div id="githubContainer"><div class="loading-state full">Loading...</div></div></section>
+    <section class="view" id="view-devto"><div class="view-header"><h2>DEV.to Articles</h2><p class="view-desc">Top developer articles this week.</p></div><div id="devtoContainer"><div class="loading-state full">Loading...</div></div></section>
+    <section class="view" id="view-stackoverflow"><div class="view-header"><h2>Stack Overflow</h2><p class="view-desc">What developers are stuck on right now.</p></div><div id="soContainer"><div class="loading-state full">Loading...</div></div></section>
+    <section class="view" id="view-crypto"><div class="view-header"><h2>Crypto Intelligence</h2><p class="view-desc">Live prices and trending coins from CoinGecko.</p></div><div id="cryptoContainer"><div class="loading-state full">Loading...</div></div></section>
+    <section class="view" id="view-jobs"><div class="view-header"><h2>Remote Jobs</h2><p class="view-desc">Latest remote opportunities from Remotive.</p></div><div id="jobsContainer"><div class="loading-state full">Loading...</div></div></section>
+    <section class="view" id="view-books"><div class="view-header"><h2>Trending Books</h2><p class="view-desc">Most-read books today + Reddit book discussions.</p></div><div id="booksContainer"><div class="loading-state full">Loading...</div></div></section>
+    <section class="view" id="view-alerts"><div class="view-header"><h2>Spike Alerts</h2><p class="view-desc">Sudden spikes across Google, HN, CoinGecko and DEV.to.</p></div><div class="alerts-list" id="alertsList"><div class="loading-state full">Scanning...</div></div></section>
+
+  </div>
+</main>
+
+<div class="modal-overlay" id="settingsModal">
+  <div class="modal">
+    <div class="modal-header"><h3>API Configuration</h3><button class="modal-close" onclick="hideSettings()">✕</button></div>
+    <div class="modal-body">
+      <div class="api-group"><label>YouTube Data API v3 <a href="https://console.cloud.google.com" target="_blank" class="api-link">Get free →</a></label><input type="text" id="ytApiKey" placeholder="AIzaSy... (free, 10K req/day)"/></div>
+      <div class="api-group"><label>NewsAPI Key <a href="https://newsapi.org" target="_blank" class="api-link">Get free →</a></label><input type="text" id="newsApiKey" placeholder="Your key (free, 100 req/day)"/></div>
+      <div class="api-group"><label>Always free — no key needed</label><input type="text" value="✓ Reddit · HN · Wikipedia · GitHub · DEV.to · CoinGecko · Open Library · SO · Remotive" disabled/></div>
+      <p class="modal-note">Google Trends requires the Python backend: <code>python backend/app.py</code></p>
+      <button class="save-btn" onclick="saveSettings()">Save & Reload</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script src="js/api.js"></script>
+<script src="js/yt-helper.js"></script>
+<script src="js/yt-loader.js"></script>
+<script src="js/charts.js"></script>
+<script src="js/app.js"></script>
+<script src="js/patch.js"></script>
+</body>
+</html>

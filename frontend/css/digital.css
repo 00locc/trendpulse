@@ -1,0 +1,56 @@
+
+/* ═══════════════════════════════════════════════
+   DIGITAL PRODUCTS INTELLIGENCE — New styles
+   ═══════════════════════════════════════════════ */
+
+/* Star nav item */
+.nav-item-star { background: rgba(0,245,160,0.05); border-color: rgba(0,245,160,0.2) !important; color: var(--accent) !important; }
+.nav-item-star:hover { background: rgba(0,245,160,0.12) !important; }
+.nav-item-star.active { background: rgba(0,245,160,0.15) !important; }
+
+/* Hero banner */
+.digital-hero { background: linear-gradient(135deg, rgba(0,245,160,0.08) 0%, rgba(77,159,255,0.06) 100%); border: 1px solid rgba(0,245,160,0.2); border-radius: var(--rl); padding: 24px 28px; margin-bottom: 24px; }
+.digital-hero-title { font-family: var(--fd); font-size: 28px; letter-spacing: 1.5px; color: var(--text); margin-bottom: 8px; }
+.digital-hero-sub { font-size: 13px; color: var(--text2); line-height: 1.6; max-width: 700px; }
+
+/* Niche grid */
+.digital-niches-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 10px; margin-bottom: 8px; }
+.digital-niche-card { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--rl); padding: 14px; cursor: pointer; transition: all .2s; }
+.digital-niche-card:hover { border-color: var(--accent); transform: translateY(-2px); }
+.digital-niche-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+.digital-niche-rank { font-family: var(--fm); font-size: 11px; color: var(--text3); font-weight: 600; }
+.digital-niche-cat { font-size: 9px; font-weight: 600; text-transform: uppercase; letter-spacing: .8px; padding: 2px 7px; border-radius: 20px; }
+.digital-niche-name { font-size: 14px; font-weight: 600; color: var(--text); margin-bottom: 10px; line-height: 1.3; }
+.digital-demand-bar-wrap { height: 4px; background: var(--bg4); border-radius: 2px; overflow: hidden; margin-bottom: 8px; }
+.digital-demand-bar { height: 100%; border-radius: 2px; transition: width .6s ease; }
+.digital-niche-stats { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; }
+.digital-signal { font-size: 10px; font-weight: 600; }
+.digital-score { font-family: var(--fm); font-size: 11px; font-weight: 600; }
+.digital-live-trend { font-size: 10px; margin-bottom: 6px; font-weight: 500; }
+.digital-niche-tags { display: flex; gap: 4px; flex-wrap: wrap; margin-bottom: 10px; }
+.digital-tag { font-size: 8px; padding: 1px 6px; border-radius: 10px; background: var(--bg3); border: 1px solid var(--border2); color: var(--text3); }
+.digital-niche-links { display: flex; gap: 5px; }
+.digital-link-btn { flex: 1; font-size: 9px; font-weight: 600; padding: 5px 4px; border-radius: 5px; border: 1px solid var(--border2); background: var(--bg3); color: var(--text2); cursor: pointer; transition: all .15s; font-family: var(--fb); text-align: center; white-space: nowrap; }
+.digital-link-btn:hover { border-color: var(--accent); color: var(--accent); background: rgba(0,245,160,0.06); }
+
+/* Etsy grid */
+.etsy-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 10px; margin-bottom: 8px; }
+.etsy-card { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--rl); padding: 14px; cursor: pointer; transition: all .2s; }
+.etsy-card:hover { border-color: var(--orange); transform: translateY(-2px); }
+.etsy-cat { font-size: 9px; font-weight: 600; text-transform: uppercase; letter-spacing: .8px; color: var(--orange); margin-bottom: 5px; }
+.etsy-product { font-size: 14px; font-weight: 600; color: var(--text); margin-bottom: 8px; line-height: 1.3; }
+.etsy-sales { font-size: 12px; color: var(--text2); margin-bottom: 4px; }
+.etsy-trend { font-size: 13px; font-weight: 600; margin-bottom: 4px; }
+.etsy-trend.up { color: var(--accent); }
+.etsy-trend.down { color: var(--pink); }
+.etsy-price { font-size: 11px; color: var(--yellow); font-weight: 600; margin-bottom: 4px; }
+
+/* Amazon grid */
+.amazon-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 10px; margin-bottom: 8px; }
+.amazon-card { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--rl); padding: 14px; cursor: pointer; transition: all .2s; }
+.amazon-card:hover { border-color: var(--yellow); transform: translateY(-2px); }
+.amazon-rank { font-family: var(--fm); font-size: 11px; color: var(--text3); margin-bottom: 5px; }
+.amazon-cat { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: .8px; color: var(--yellow); margin-bottom: 3px; }
+.amazon-sub { font-size: 14px; font-weight: 600; color: var(--text); margin-bottom: 8px; line-height: 1.3; }
+.amazon-signal { font-size: 12px; font-weight: 600; margin-bottom: 6px; }
+.amazon-insight { font-size: 11px; color: var(--text2); line-height: 1.4; margin-bottom: 4px; }
