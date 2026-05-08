@@ -48,12 +48,8 @@
       <div class="status-row"><span class="dot green"></span>Reddit · HN · Wikipedia</div>
       <div class="status-row"><span class="dot green"></span>GitHub · DEV.to · SO</div>
       <div class="status-row"><span class="dot green"></span>CoinGecko · Open Library</div>
-      <div class="status-row"><span class="dot green"></span>Amazon/Etsy signals</div>
-      <div class="status-row"><span class="dot yellow"></span>YouTube (key needed)</div>
-      <div class="status-row"><span class="dot yellow"></span>NewsAPI (key needed)</div>
-      <div class="status-row"><span class="dot yellow"></span>Google Trends (backend)</div>
+      <div class="status-row"><span class="dot green"></span>YouTube · NewsAPI · Google Trends</div>
     </div>
-    <button class="settings-btn" onclick="showSettings()">⚙ API Keys</button>
   </div>
 </aside>
 
@@ -102,27 +98,27 @@
         </div>
       </div>
       <div class="dash-panels">
-        <div class="panel"><div class="panel-header"><div class="panel-title">🔥 Google Trending</div><span class="panel-tag">Live</span></div><div class="trend-list" id="trendingList"><div class="loading-state">Loading...</div></div></div>
-        <div class="panel"><div class="panel-header"><div class="panel-title">💻 Hacker News</div><span class="panel-tag">Tech</span></div><div class="trend-list" id="hnList"><div class="loading-state">Loading...</div></div></div>
-        <div class="panel"><div class="panel-header"><div class="panel-title">📖 Wikipedia Today</div><span class="panel-tag">Now</span></div><div class="trend-list" id="wikiList"><div class="loading-state">Loading...</div></div></div>
-        <div class="panel"><div class="panel-header"><div class="panel-title">🚀 Product Hunt</div><span class="panel-tag">Today</span></div><div class="trend-list" id="phList"><div class="loading-state">Loading...</div></div></div>
-        <div class="panel"><div class="panel-header"><div class="panel-title">💰 Crypto Trending</div><span class="panel-tag">CoinGecko</span></div><div class="trend-list" id="cryptoList"><div class="loading-state">Loading...</div></div></div>
-        <div class="panel"><div class="panel-header"><div class="panel-title">🛒 Hot Products</div><span class="panel-tag">Reddit</span></div><div class="trend-list" id="productsList"><div class="loading-state">Loading...</div></div></div>
-        <div class="panel"><div class="panel-header"><div class="panel-title">❓ Top Questions</div><span class="panel-tag">Today</span></div><div class="trend-list" id="questionsList"><div class="loading-state">Loading...</div></div></div>
+        <div class="panel"><div class="panel-header"><div class="panel-title">🔥 Google Trending</div><span class="panel-tag">Live</span></div><div class="trend-list" id="trendingList"></div></div>
+        <div class="panel"><div class="panel-header"><div class="panel-title">💻 Hacker News</div><span class="panel-tag">Tech</span></div><div class="trend-list" id="hnList"></div></div>
+        <div class="panel"><div class="panel-header"><div class="panel-title">📖 Wikipedia Today</div><span class="panel-tag">Now</span></div><div class="trend-list" id="wikiList"></div></div>
+        <div class="panel"><div class="panel-header"><div class="panel-title">🚀 Product Hunt</div><span class="panel-tag">Today</span></div><div class="trend-list" id="phList"></div></div>
+        <div class="panel"><div class="panel-header"><div class="panel-title">💰 Crypto Trending</div><span class="panel-tag">CoinGecko</span></div><div class="trend-list" id="cryptoList"></div></div>
+        <div class="panel"><div class="panel-header"><div class="panel-title">🛒 Hot Products</div><span class="panel-tag">Reddit</span></div><div class="trend-list" id="productsList"></div></div>
+        <div class="panel"><div class="panel-header"><div class="panel-title">❓ Top Questions</div><span class="panel-tag">Today</span></div><div class="trend-list" id="questionsList"></div></div>
       </div>
     </section>
 
-    <!-- ★ DIGITAL PRODUCTS — Main feature -->
+    <!-- DIGITAL PRODUCTS -->
     <section class="view" id="view-digital">
       <div class="view-header">
         <h2>Digital Products Intelligence</h2>
-        <p class="view-desc">Find exactly what PDFs, ebooks, templates and guides people are searching for and buying right now. Use this to pick your next winning digital product.</p>
+        <p class="view-desc">Find what PDFs, ebooks, templates and guides people are buying right now. Pick your next winning digital product.</p>
       </div>
-      <div id="digitalContainer"><div class="loading-state full">Analyzing demand signals from Amazon, Etsy, Reddit, and Google...</div></div>
+      <div id="digitalContainer"><div class="loading-state full">Analyzing demand signals...</div></div>
     </section>
 
     <section class="view" id="view-topics">
-      <div class="view-header"><h2>Topic Explorer</h2><p class="view-desc">Google + Reddit (120+ subs) + Hacker News + Wikipedia + DEV.to + GitHub — all in one place.</p>
+      <div class="view-header"><h2>Topic Explorer</h2><p class="view-desc">Google + Reddit + Hacker News + Wikipedia + DEV.to + GitHub — all in one place.</p>
         <div class="filter-row">
           <select id="topicCategory" onchange="State._loaded['topics']=false;loadTopics()"><option value="all">All Categories</option><option value="technology">Technology</option><option value="health">Health</option><option value="finance">Finance</option><option value="entertainment">Entertainment</option><option value="food">Food</option><option value="travel">Travel</option><option value="lifestyle">Lifestyle</option></select>
           <select id="topicSource" onchange="State._loaded['topics']=false;loadTopics()"><option value="all">All Sources</option><option value="google">Google Trends</option><option value="reddit">Reddit</option><option value="hn">Hacker News</option><option value="wikipedia">Wikipedia</option><option value="devto">DEV.to</option><option value="github">GitHub</option></select>
@@ -132,42 +128,33 @@
     </section>
 
     <section class="view" id="view-products">
-      <div class="view-header"><h2>Product Demand Intelligence</h2><p class="view-desc">What people are actively buying, recommending and searching for — extracted from Reddit, Product Hunt, and shopping signals.</p></div>
+      <div class="view-header"><h2>Product Demand Intelligence</h2><p class="view-desc">What people are actively buying and recommending across Reddit and Product Hunt.</p></div>
       <div id="productsGrid"><div class="loading-state full">Loading...</div></div>
     </section>
 
     <section class="view" id="view-questions">
-      <div class="view-header"><h2>What People Are Asking</h2><p class="view-desc">Real questions from Reddit, Hacker News, and Stack Overflow. Sorted by engagement.</p>
+      <div class="view-header"><h2>What People Are Asking</h2><p class="view-desc">Real questions from Reddit, Hacker News, and Stack Overflow — sorted by engagement.</p>
         <div class="filter-row"><select id="intentFilter" onchange="State._loaded['questions']=false;loadQuestions()"><option value="all">All Intents</option><option value="how">How-to</option><option value="what">Informational</option><option value="best">Best-of</option><option value="buy">Purchase Intent</option><option value="why">Conceptual</option></select></div>
       </div>
       <div class="questions-container" id="questionsContainer"><div class="loading-state full">Loading...</div></div>
     </section>
 
-    <section class="view" id="view-youtube"><div class="view-header"><h2>YouTube Trends</h2><p class="view-desc">Trending videos across categories. Add your free YouTube API key in ⚙ API Keys.</p></div><div id="youtubeContainer"><div class="loading-state full">Loading...</div></div></section>
-    <section class="view" id="view-news"><div class="view-header"><h2>News & Headlines</h2><p class="view-desc">Hacker News (live) + NewsAPI. Add your free NewsAPI key in ⚙ API Keys.</p></div><div id="newsContainer"><div class="loading-state full">Loading...</div></div></section>
+    <section class="view" id="view-youtube"><div class="view-header"><h2>YouTube Trends</h2><p class="view-desc">Trending videos across 6 categories.</p></div><div id="youtubeContainer"><div class="loading-state full">Loading...</div></div></section>
+    <section class="view" id="view-news"><div class="view-header"><h2>News & Headlines</h2><p class="view-desc">Hacker News + top headlines updated live.</p></div><div id="newsContainer"><div class="loading-state full">Loading...</div></div></section>
     <section class="view" id="view-github"><div class="view-header"><h2>GitHub Trending</h2><p class="view-desc">What developers are building right now.</p></div><div id="githubContainer"><div class="loading-state full">Loading...</div></div></section>
     <section class="view" id="view-devto"><div class="view-header"><h2>DEV.to Articles</h2><p class="view-desc">Top developer articles this week.</p></div><div id="devtoContainer"><div class="loading-state full">Loading...</div></div></section>
     <section class="view" id="view-stackoverflow"><div class="view-header"><h2>Stack Overflow</h2><p class="view-desc">What developers are stuck on right now.</p></div><div id="soContainer"><div class="loading-state full">Loading...</div></div></section>
     <section class="view" id="view-crypto"><div class="view-header"><h2>Crypto Intelligence</h2><p class="view-desc">Live prices and trending coins from CoinGecko.</p></div><div id="cryptoContainer"><div class="loading-state full">Loading...</div></div></section>
     <section class="view" id="view-jobs"><div class="view-header"><h2>Remote Jobs</h2><p class="view-desc">Latest remote opportunities from Remotive.</p></div><div id="jobsContainer"><div class="loading-state full">Loading...</div></div></section>
     <section class="view" id="view-books"><div class="view-header"><h2>Trending Books</h2><p class="view-desc">Most-read books today + Reddit book discussions.</p></div><div id="booksContainer"><div class="loading-state full">Loading...</div></div></section>
-    <section class="view" id="view-alerts"><div class="view-header"><h2>Spike Alerts</h2><p class="view-desc">Sudden spikes across Google, HN, CoinGecko and DEV.to.</p></div><div class="alerts-list" id="alertsList"><div class="loading-state full">Scanning...</div></div></section>
+    <section class="view" id="view-alerts"><div class="view-header"><h2>Spike Alerts</h2><p class="view-desc">Sudden spikes across Google, HN and CoinGecko.</p></div><div class="alerts-list" id="alertsList"><div class="loading-state full">Scanning...</div></div></section>
 
   </div>
 </main>
 
-<div class="modal-overlay" id="settingsModal">
-  <div class="modal">
-    <div class="modal-header"><h3>API Configuration</h3><button class="modal-close" onclick="hideSettings()">✕</button></div>
-    <div class="modal-body">
-      <div class="api-group"><label>YouTube Data API v3 <a href="https://console.cloud.google.com" target="_blank" class="api-link">Get free →</a></label><input type="text" id="ytApiKey" placeholder="AIzaSy... (free, 10K req/day)"/></div>
-      <div class="api-group"><label>NewsAPI Key <a href="https://newsapi.org" target="_blank" class="api-link">Get free →</a></label><input type="text" id="newsApiKey" placeholder="Your key (free, 100 req/day)"/></div>
-      <div class="api-group"><label>Always free — no key needed</label><input type="text" value="✓ Reddit · HN · Wikipedia · GitHub · DEV.to · CoinGecko · Open Library · SO · Remotive" disabled/></div>
-      <p class="modal-note">Google Trends requires the Python backend: <code>python backend/app.py</code></p>
-      <button class="save-btn" onclick="saveSettings()">Save & Reload</button>
-    </div>
-  </div>
-</div>
+<!-- Hidden settings inputs for API keys (not visible to users) -->
+<input type="hidden" id="ytApiKey"/>
+<input type="hidden" id="newsApiKey"/>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <script src="js/api.js"></script>
