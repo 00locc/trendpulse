@@ -86,6 +86,22 @@ function buildLink(item) {
   return q ? `https://www.google.com/search?q=${encodeURIComponent(q)}` : '#';
 }
 
+function renderPulseWidget(items) {
+  const el = document.getElementById('pulsePanels');
+  if (!el) return;
+  el.innerHTML = items.map(item => `
+    <div class="pulse-card" onclick="openLink('${escAttr(item.url)}')">
+      <div class="pulse-source" style="color:${item.color}">${escHtml(item.source)}</div>
+      <div class="pulse-topic">${escHtml(item.topic.substring(0,60))}${item.topic.length>60?'...':''}</div>
+      <div class="pulse-meta">${escHtml(item.meta)}</div>
+      <div class="pulse-bar" style="background:${item.color};width:100%;opacity:0.4"></div>
+      <div class="pulse-delta" style="color:${item.color}">${escHtml(item.delta)}</div>
+    </div>
+  `).join('');
+  const ts = document.getElementById('pulseUpdated');
+  if (ts) ts.textContent = 'Updated ' + new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
+}
+
 // ── CURATED DEMO DATA (always shown instantly) ────────────────────────
 
 const DEMO_PH = [
@@ -138,10 +154,10 @@ const DEMO_QUESTIONS = [
 const DEMO_CHART = {
   labels: ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'],
   datasets: {
-    'Google':  [4200, 5100, 4800, 6100, 7200, 6600, 8100],
-    'Reddit':  [3100, 3600, 3200, 4500, 5100, 4700, 5800],
-    'YouTube': [1800, 2100, 2000, 2700, 3200, 3000, 3600],
-    'News':    [900,  1100, 1050, 1400, 1700, 1500, 1900],
+    google:  [4200, 5100, 4800, 6100, 7200, 6600, 8100],
+    reddit:  [3100, 3600, 3200, 4500, 5100, 4700, 5800],
+    youtube: [1800, 2100, 2000, 2700, 3200, 3000, 3600],
+    news:    [900,  1100, 1050, 1400, 1700, 1500, 1900],
   }
 };
 
@@ -159,8 +175,15 @@ async function loadDashboard() {
   setMetric('m-products', '48+',   'm-products-delta', 'In demand right now',   'up');
   setMetric('m-questions','80+',   'm-questions-delta','Being asked today',     'up');
 
-  Charts.initVolumeChart(DEMO_CHART);
   Charts.initPlatformChart(null);
+  renderPulseWidget([
+    { source:'Google',    color:'#00f5a0', topic:'AI productivity tools',      meta:'Search trend',         delta:'+41%', url:'https://trends.google.com/trends/explore?q=AI+productivity' },
+    { source:'Hacker News',color:'#ff6314',topic:'Show HN: top projects',       meta:'Tech discussion',      delta:'842 pts', url:'https://news.ycombinator.com' },
+    { source:'Wikipedia', color:'#4d9fff', topic:'Artificial Intelligence',      meta:'2.1M views today',    delta:'Trending', url:'https://en.wikipedia.org/wiki/Artificial_intelligence' },
+    { source:'Reddit',    color:'#ff4500', topic:'Best side hustle ideas 2025',  meta:'r/Entrepreneur',       delta:'4.8K pts', url:'https://reddit.com/r/Entrepreneur' },
+    { source:'Product Hunt',color:'#ff7a2f',topic:'NotebookLM by Google',       meta:'Today\'s top launch',  delta:'▲ 1,240', url:'https://notebooklm.google.com' },
+    { source:'CoinGecko', color:'#ffd60a', topic:'Bitcoin (BTC)',               meta:'MCap Rank #1',         delta:'Trending', url:'https://www.coingecko.com/en/coins/bitcoin' },
+  ]);
 
   renderDashList('trendingList',  demoTrending,    'google');
   renderDashList('phList',        DEMO_PH,         'ph');
@@ -185,7 +208,17 @@ async function loadDashboard() {
     if (hnPosts.length)      renderDashList('hnList',      hnPosts.slice(0,10),   'hn');
     if (wikiPages.length)    renderDashList('wikiList',    wikiPages.slice(0,10), 'wiki');
     if (googleTrending.length) renderDashList('trendingList', googleTrending,     'google');
-    if (trendData?.datasets) Charts.initVolumeChart(trendData);
+
+    // Update pulse widget with live data
+    const pulseItems = [
+      googleTrending[0] ? { source:'Google',     color:'#00f5a0', topic:googleTrending[0].term,       meta:'Google Trends',      delta:googleTrending[0].delta||'', url:`https://trends.google.com/trends/explore?q=${encodeURIComponent(googleTrending[0].term)}` } : null,
+      hnPosts[0]        ? { source:'Hacker News', color:'#ff6314', topic:hnPosts[0].title,              meta:`${formatNum(hnPosts[0].score)} pts`,  delta:hnPosts[0].comments+' comments', url:hnPosts[0].url } : null,
+      wikiPages[0]      ? { source:'Wikipedia',   color:'#4d9fff', topic:wikiPages[0].title,            meta:formatNum(wikiPages[0].views)+' views', delta:'Trending', url:wikiPages[0].url } : null,
+      { source:'Reddit',      color:'#ff4500', topic:'Best side hustle ideas 2025',  meta:'r/Entrepreneur',  delta:'4.8K pts',  url:'https://reddit.com/r/Entrepreneur' },
+      { source:'Product Hunt',color:'#ff7a2f', topic:'NotebookLM by Google',        meta:'Top launch today',delta:'▲ 1,240',   url:'https://notebooklm.google.com' },
+      { source:'CoinGecko',   color:'#ffd60a', topic:'Bitcoin (BTC)',               meta:'MCap Rank #1',    delta:'Trending',  url:'https://www.coingecko.com/en/coins/bitcoin' },
+    ].filter(Boolean);
+    renderPulseWidget(pulseItems);
 
     // PH and Crypto independently
     API.getProductHuntTrending().then(ph => { if (ph?.length) renderDashList('phList', ph.slice(0,8), 'ph'); }).catch(() => {});
