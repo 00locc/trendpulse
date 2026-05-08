@@ -190,6 +190,7 @@ async function loadDashboard() {
   renderDashList('cryptoList',    DEMO_CRYPTO,     'crypto');
   renderDashList('productsList',  DEMO_PRODUCTS,   'product');
   renderDashList('questionsList', DEMO_QUESTIONS,  'question');
+  if (typeof renderTwitterList === 'function') renderTwitterList(getTwitterDemo());
   // HN and Wiki get placeholders until live loads
   renderDashList('hnList',   [{title:'Loading Hacker News...',score:0,url:'https://news.ycombinator.com',comments:0}], 'hn');
   renderDashList('wikiList', [{title:'Loading Wikipedia...',views:0,url:'https://en.wikipedia.org'}], 'wiki');
@@ -223,6 +224,8 @@ async function loadDashboard() {
     // PH and Crypto independently
     API.getProductHuntTrending().then(ph => { if (ph?.length) renderDashList('phList', ph.slice(0,8), 'ph'); }).catch(() => {});
     API.getCryptoTrending().then(c  => { if (c?.length)  renderDashList('cryptoList', c.slice(0,8),  'crypto'); }).catch(() => {});
+    // Twitter
+    if (typeof loadTwitterPanel === 'function') loadTwitterPanel();
 
     // Reddit last — may be blocked on Railway, won't hold up anything else
     API.getRedditDashboard().then(redditPosts => {

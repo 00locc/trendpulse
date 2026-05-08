@@ -1,0 +1,900 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>TrendPulse — Discover What People Want to Buy</title>
+  <meta name="description" content="Free trend intelligence for digital product creators. Find what PDFs, ebooks and templates are in demand right now using live data from Google, Reddit, Amazon and Etsy."/>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --bg: #07070d;
+      --bg2: #0f0f18;
+      --bg3: #16161f;
+      --border: rgba(255,255,255,0.07);
+      --accent: #00f5a0;
+      --accent2: #00c97e;
+      --blue: #4d9fff;
+      --orange: #ff7a2f;
+      --pink: #ff4d8f;
+      --yellow: #ffd60a;
+      --text: #eeeef5;
+      --text2: #8888a0;
+      --text3: #44445a;
+      --fd: 'Bebas Neue', sans-serif;
+      --fb: 'Outfit', sans-serif;
+      --fm: 'JetBrains Mono', monospace;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: var(--fb);
+      background: var(--bg);
+      color: var(--text);
+      font-size: 16px;
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+
+    /* ── NOISE OVERLAY ── */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 1000;
+      opacity: 0.5;
+    }
+
+    /* ── NAV ── */
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 18px 40px;
+      background: rgba(7,7,13,0.85);
+      backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border);
+    }
+    .nav-logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-family: var(--fd);
+      font-size: 22px;
+      letter-spacing: 1px;
+    }
+    .nav-logo-icon {
+      width: 32px; height: 32px;
+      background: var(--accent);
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .nav-logo em { font-style: normal; color: var(--accent); }
+    .nav-cta {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .btn-ghost {
+      padding: 8px 20px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text2);
+      font-size: 13px;
+      font-weight: 500;
+      text-decoration: none;
+      transition: all .2s;
+      font-family: var(--fb);
+    }
+    .btn-ghost:hover { border-color: var(--accent); color: var(--accent); }
+    .btn-primary {
+      padding: 10px 24px;
+      background: var(--accent);
+      color: #000;
+      border: none;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 700;
+      text-decoration: none;
+      cursor: pointer;
+      transition: all .2s;
+      font-family: var(--fb);
+    }
+    .btn-primary:hover { background: var(--accent2); transform: translateY(-1px); }
+
+    /* ── HERO ── */
+    .hero {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 120px 24px 80px;
+      position: relative;
+      overflow: hidden;
+    }
+    .hero-glow {
+      position: absolute;
+      top: 20%;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 600px;
+      height: 600px;
+      background: radial-gradient(circle, rgba(0,245,160,0.08) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .hero-glow2 {
+      position: absolute;
+      top: 40%;
+      left: 20%;
+      width: 400px;
+      height: 400px;
+      background: radial-gradient(circle, rgba(77,159,255,0.05) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 16px;
+      background: rgba(0,245,160,0.08);
+      border: 1px solid rgba(0,245,160,0.2);
+      border-radius: 100px;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--accent);
+      margin-bottom: 28px;
+      letter-spacing: .5px;
+    }
+    .hero-badge::before {
+      content: '';
+      width: 6px; height: 6px;
+      background: var(--accent);
+      border-radius: 50%;
+      animation: pulse 2s infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.5; transform: scale(1.3); }
+    }
+    .hero-title {
+      font-family: var(--fd);
+      font-size: clamp(52px, 8vw, 96px);
+      line-height: 0.95;
+      letter-spacing: 2px;
+      margin-bottom: 24px;
+      max-width: 900px;
+    }
+    .hero-title .accent { color: var(--accent); }
+    .hero-title .dim { color: var(--text3); }
+    .hero-sub {
+      font-size: clamp(16px, 2.5vw, 20px);
+      color: var(--text2);
+      max-width: 580px;
+      margin: 0 auto 40px;
+      line-height: 1.7;
+      font-weight: 400;
+    }
+    .hero-sub strong { color: var(--text); font-weight: 600; }
+    .hero-actions {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 14px;
+      flex-wrap: wrap;
+      margin-bottom: 60px;
+    }
+    .btn-hero {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 16px 36px;
+      background: var(--accent);
+      color: #000;
+      border: none;
+      border-radius: 10px;
+      font-size: 16px;
+      font-weight: 700;
+      text-decoration: none;
+      cursor: pointer;
+      transition: all .25s;
+      font-family: var(--fb);
+      letter-spacing: .3px;
+    }
+    .btn-hero:hover {
+      background: var(--accent2);
+      transform: translateY(-3px);
+      box-shadow: 0 20px 50px rgba(0,245,160,0.25);
+    }
+    .btn-hero-ghost {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 16px 36px;
+      background: transparent;
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      font-size: 16px;
+      font-weight: 600;
+      text-decoration: none;
+      cursor: pointer;
+      transition: all .25s;
+      font-family: var(--fb);
+    }
+    .btn-hero-ghost:hover { border-color: var(--text2); transform: translateY(-2px); }
+    .hero-proof {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 28px;
+      flex-wrap: wrap;
+    }
+    .proof-item {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      font-size: 13px;
+      color: var(--text3);
+    }
+    .proof-item span { color: var(--accent); font-weight: 600; }
+
+    /* ── TICKER ── */
+    .ticker-wrap {
+      overflow: hidden;
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      background: var(--bg2);
+      padding: 12px 0;
+    }
+    .ticker {
+      display: flex;
+      gap: 0;
+      animation: ticker 30s linear infinite;
+      width: max-content;
+    }
+    .ticker:hover { animation-play-state: paused; }
+    @keyframes ticker { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+    .ticker-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 0 32px;
+      font-size: 12px;
+      font-weight: 600;
+      white-space: nowrap;
+      color: var(--text2);
+    }
+    .ticker-item .dot {
+      width: 5px; height: 5px;
+      border-radius: 50%;
+      background: var(--accent);
+      flex-shrink: 0;
+    }
+    .ticker-item strong { color: var(--text); }
+
+    /* ── FEATURES ── */
+    .section { padding: 100px 24px; max-width: 1200px; margin: 0 auto; }
+    .section-label {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      color: var(--accent);
+      margin-bottom: 14px;
+    }
+    .section-title {
+      font-family: var(--fd);
+      font-size: clamp(36px, 5vw, 60px);
+      letter-spacing: 1.5px;
+      line-height: 1;
+      margin-bottom: 16px;
+    }
+    .section-sub {
+      font-size: 16px;
+      color: var(--text2);
+      max-width: 520px;
+      line-height: 1.7;
+      margin-bottom: 56px;
+    }
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 16px;
+    }
+    .feature-card {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 28px;
+      transition: all .25s;
+      position: relative;
+      overflow: hidden;
+    }
+    .feature-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, var(--accent-color, var(--accent)), transparent);
+      opacity: 0;
+      transition: opacity .25s;
+    }
+    .feature-card:hover { border-color: rgba(255,255,255,0.15); transform: translateY(-4px); }
+    .feature-card:hover::before { opacity: 1; }
+    .feature-icon {
+      font-size: 28px;
+      margin-bottom: 16px;
+      display: block;
+    }
+    .feature-title {
+      font-size: 17px;
+      font-weight: 700;
+      margin-bottom: 10px;
+    }
+    .feature-desc {
+      font-size: 14px;
+      color: var(--text2);
+      line-height: 1.6;
+    }
+    .feature-tag {
+      display: inline-block;
+      margin-top: 14px;
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      padding: 3px 9px;
+      border-radius: 100px;
+      background: rgba(0,245,160,0.1);
+      color: var(--accent);
+      border: 1px solid rgba(0,245,160,0.2);
+    }
+
+    /* ── NICHES PREVIEW ── */
+    .niches-section {
+      background: var(--bg2);
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      padding: 100px 24px;
+    }
+    .niches-inner { max-width: 1200px; margin: 0 auto; }
+    .niches-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 10px;
+      margin-top: 48px;
+    }
+    .niche-card {
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px;
+      transition: all .2s;
+      cursor: pointer;
+      text-decoration: none;
+    }
+    .niche-card:hover { border-color: var(--accent); transform: translateY(-3px); }
+    .niche-rank { font-family: var(--fm); font-size: 10px; color: var(--text3); margin-bottom: 6px; }
+    .niche-name { font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 8px; line-height: 1.3; }
+    .niche-bar { height: 3px; background: var(--bg); border-radius: 2px; overflow: hidden; margin-bottom: 8px; }
+    .niche-fill { height: 100%; border-radius: 2px; }
+    .niche-signal { font-size: 10px; font-weight: 700; }
+    .niche-cat {
+      font-size: 9px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: .8px;
+      padding: 2px 7px;
+      border-radius: 100px;
+      margin-top: 6px;
+      display: inline-block;
+    }
+
+    /* ── EMAIL SECTION ── */
+    .email-section {
+      padding: 100px 24px;
+      max-width: 700px;
+      margin: 0 auto;
+      text-align: center;
+    }
+    .email-card {
+      background: var(--bg2);
+      border: 1px solid rgba(0,245,160,0.2);
+      border-radius: 20px;
+      padding: 56px 48px;
+      position: relative;
+      overflow: hidden;
+    }
+    .email-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--blue), var(--accent), var(--yellow));
+    }
+    .email-glow {
+      position: absolute;
+      bottom: -100px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 400px;
+      height: 300px;
+      background: radial-gradient(circle, rgba(0,245,160,0.06) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .email-title {
+      font-family: var(--fd);
+      font-size: 42px;
+      letter-spacing: 1.5px;
+      margin-bottom: 14px;
+      line-height: 1;
+    }
+    .email-sub {
+      font-size: 15px;
+      color: var(--text2);
+      margin-bottom: 32px;
+      line-height: 1.6;
+    }
+    .email-form {
+      display: flex;
+      gap: 10px;
+      max-width: 480px;
+      margin: 0 auto 20px;
+    }
+    .email-input {
+      flex: 1;
+      padding: 14px 18px;
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      color: var(--text);
+      font-size: 14px;
+      font-family: var(--fb);
+      outline: none;
+      transition: border-color .2s;
+    }
+    .email-input:focus { border-color: var(--accent); }
+    .email-input::placeholder { color: var(--text3); }
+    .email-submit {
+      padding: 14px 28px;
+      background: var(--accent);
+      color: #000;
+      border: none;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all .2s;
+      font-family: var(--fb);
+      white-space: nowrap;
+    }
+    .email-submit:hover { background: var(--accent2); transform: translateY(-1px); }
+    .email-note {
+      font-size: 12px;
+      color: var(--text3);
+    }
+    .email-note strong { color: var(--accent); }
+    .email-success {
+      display: none;
+      padding: 16px 24px;
+      background: rgba(0,245,160,0.1);
+      border: 1px solid rgba(0,245,160,0.3);
+      border-radius: 10px;
+      color: var(--accent);
+      font-weight: 600;
+      font-size: 14px;
+      margin-top: 16px;
+    }
+
+    /* ── SOURCES BAR ── */
+    .sources-bar {
+      padding: 60px 24px;
+      text-align: center;
+      border-top: 1px solid var(--border);
+    }
+    .sources-label {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      color: var(--text3);
+      margin-bottom: 28px;
+    }
+    .sources-list {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .source-pill {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 7px 16px;
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 100px;
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--text2);
+    }
+    .source-dot { width: 6px; height: 6px; border-radius: 50%; }
+
+    /* ── HOW IT WORKS ── */
+    .steps-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 24px;
+    }
+    .step-card {
+      position: relative;
+      padding: 32px;
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+    }
+    .step-num {
+      font-family: var(--fd);
+      font-size: 64px;
+      color: var(--text3);
+      line-height: 1;
+      margin-bottom: 12px;
+      letter-spacing: 2px;
+    }
+    .step-title { font-size: 18px; font-weight: 700; margin-bottom: 10px; }
+    .step-desc { font-size: 14px; color: var(--text2); line-height: 1.6; }
+
+    /* ── CTA SECTION ── */
+    .cta-section {
+      padding: 120px 24px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .cta-section::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 50%; transform: translateX(-50%);
+      width: 800px; height: 400px;
+      background: radial-gradient(ellipse, rgba(0,245,160,0.06) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .cta-title {
+      font-family: var(--fd);
+      font-size: clamp(44px, 7vw, 80px);
+      letter-spacing: 2px;
+      line-height: 1;
+      margin-bottom: 20px;
+    }
+    .cta-sub {
+      font-size: 17px;
+      color: var(--text2);
+      margin-bottom: 40px;
+      max-width: 480px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    /* ── FOOTER ── */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 32px 40px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .footer-logo {
+      font-family: var(--fd);
+      font-size: 18px;
+      letter-spacing: 1px;
+    }
+    .footer-logo em { font-style: normal; color: var(--accent); }
+    footer p { font-size: 12px; color: var(--text3); }
+
+    /* ── ANIMATIONS ── */
+    .fade-up {
+      opacity: 0;
+      transform: translateY(30px);
+      transition: opacity .6s ease, transform .6s ease;
+    }
+    .fade-up.visible { opacity: 1; transform: translateY(0); }
+
+    @media (max-width: 640px) {
+      nav { padding: 14px 20px; }
+      .email-card { padding: 36px 24px; }
+      .email-form { flex-direction: column; }
+      footer { flex-direction: column; text-align: center; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo">
+    <div class="nav-logo-icon">
+      <svg viewBox="0 0 24 24" fill="none" width="18" height="18">
+        <polyline points="2,17 8,11 12,15 18,7 22,10" stroke="#000" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+        <circle cx="22" cy="10" r="2" fill="#000"/>
+      </svg>
+    </div>
+    Trend<em>Pulse</em>
+  </div>
+  <div class="nav-cta">
+    <a href="#how" class="btn-ghost">How it works</a>
+    <a href="dashboard.html" class="btn-primary">Launch App →</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-glow"></div>
+  <div class="hero-glow2"></div>
+  <div>
+    <div class="hero-badge">🔴 Live data · Updated every hour</div>
+    <h1 class="hero-title">
+      Find What People<br>
+      <span class="accent">Want to Buy</span><br>
+      <span class="dim">Right Now</span>
+    </h1>
+    <p class="hero-sub">
+      Free trend intelligence for <strong>digital product creators</strong>. Discover which ebooks, PDFs and templates are in demand using live signals from Google, Reddit, Amazon and Etsy.
+    </p>
+    <div class="hero-actions">
+      <a href="dashboard.html" class="btn-hero">
+        <svg width="16" height="16" viewBox="0 0 20 20" fill="none"><polyline points="2,14 7,9 11,13 16,6 19,8" stroke="#000" stroke-width="2" stroke-linecap="round"/></svg>
+        Explore Trends Free
+      </a>
+      <a href="#email" class="btn-hero-ghost">Get Weekly Report →</a>
+    </div>
+    <div class="hero-proof">
+      <div class="proof-item">✓ <span>100% Free</span> — no credit card</div>
+      <div class="proof-item">✓ <span>15+ sources</span> in one place</div>
+      <div class="proof-item">✓ Updated <span>every hour</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- TICKER -->
+<div class="ticker-wrap">
+  <div class="ticker">
+    <div class="ticker-item"><span class="dot"></span> <strong>AI Prompts Collection</strong> — VERY HIGH demand</div>
+    <div class="ticker-item"><span class="dot"></span> <strong>Notion Templates</strong> — 50K+ sales/month on Etsy</div>
+    <div class="ticker-item"><span class="dot"></span> <strong>Intermittent Fasting Guide</strong> — 93/100 demand score</div>
+    <div class="ticker-item"><span class="dot"></span> <strong>Budget Tracker PDF</strong> — HIGH demand signal</div>
+    <div class="ticker-item"><span class="dot"></span> <strong>ChatGPT for Business</strong> — VERY HIGH demand</div>
+    <div class="ticker-item"><span class="dot"></span> <strong>Canva Templates</strong> — 80K+ sales/month on Etsy</div>
+    <div class="ticker-item"><span class="dot"></span> <strong>Side Hustle Blueprint</strong> — HIGH demand signal</div>
+    <div class="ticker-item"><span class="dot"></span> <strong>Mental Health Workbook</strong> — 90/100 demand score</div>
+    <!-- duplicate for infinite scroll -->
+    <div class="ticker-item"><span class="dot"></span> <strong>AI Prompts Collection</strong> — VERY HIGH demand</div>
+    <div class="ticker-item"><span class="dot"></span> <strong>Notion Templates</strong> — 50K+ sales/month on Etsy</div>
+    <div class="ticker-item"><span class="dot"></span> <strong>Intermittent Fasting Guide</strong> — 93/100 demand score</div>
+    <div class="ticker-item"><span class="dot"></span> <strong>Budget Tracker PDF</strong> — HIGH demand signal</div>
+    <div class="ticker-item"><span class="dot"></span> <strong>ChatGPT for Business</strong> — VERY HIGH demand</div>
+    <div class="ticker-item"><span class="dot"></span> <strong>Canva Templates</strong> — 80K+ sales/month on Etsy</div>
+    <div class="ticker-item"><span class="dot"></span> <strong>Side Hustle Blueprint</strong> — HIGH demand signal</div>
+    <div class="ticker-item"><span class="dot"></span> <strong>Mental Health Workbook</strong> — 90/100 demand score</div>
+  </div>
+</div>
+
+<!-- FEATURES -->
+<div class="section fade-up" id="features">
+  <div class="section-label">What You Get</div>
+  <h2 class="section-title">Intelligence That Sells</h2>
+  <p class="section-sub">Stop guessing what to create. Use real demand data to pick products people are already searching for.</p>
+  <div class="features-grid">
+    <div class="feature-card" style="--accent-color: var(--accent)">
+      <span class="feature-icon">📚</span>
+      <div class="feature-title">Digital Products Intelligence</div>
+      <div class="feature-desc">32 ranked ebook and PDF niches with live demand scores. See exactly what's selling on Amazon KDP and Etsy right now — with direct links.</div>
+      <div class="feature-tag">⭐ Most Popular</div>
+    </div>
+    <div class="feature-card" style="--accent-color: var(--orange)">
+      <span class="feature-icon">🔥</span>
+      <div class="feature-title">Google Trending Searches</div>
+      <div class="feature-desc">See what millions of people are searching right now. Catch trends early before they become saturated — directly from Google Trends data.</div>
+    </div>
+    <div class="feature-card" style="--accent-color: var(--blue)">
+      <span class="feature-icon">💬</span>
+      <div class="feature-title">What People Are Asking</div>
+      <div class="feature-desc">Real questions from Reddit, Hacker News and Stack Overflow. Every question is a potential PDF or guide topic with proven demand.</div>
+    </div>
+    <div class="feature-card" style="--accent-color: var(--yellow)">
+      <span class="feature-icon">🛍️</span>
+      <div class="feature-title">Etsy Bestseller Data</div>
+      <div class="feature-desc">12 top-selling digital product categories on Etsy with monthly sales volumes, trend percentages and price ranges. Know what actually converts.</div>
+    </div>
+    <div class="feature-card" style="--accent-color: var(--pink)">
+      <span class="feature-icon">📦</span>
+      <div class="feature-title">Amazon Demand Signals</div>
+      <div class="feature-desc">Amazon bestseller category signals showing where buyers spend money. Align your product with categories that already have proven buyer intent.</div>
+    </div>
+    <div class="feature-card" style="--accent-color: var(--accent)">
+      <span class="feature-icon">🚨</span>
+      <div class="feature-title">Spike Alerts</div>
+      <div class="feature-desc">Be the first to know when a topic suddenly surges in interest. Turn breaking trends into digital products before everyone else catches on.</div>
+    </div>
+  </div>
+</div>
+
+<!-- NICHES PREVIEW -->
+<div class="niches-section">
+  <div class="niches-inner">
+    <div class="section-label">Live Preview</div>
+    <h2 class="section-title">Top Niches Right Now</h2>
+    <p class="section-sub" style="margin-bottom:0">A snapshot of the demand data inside TrendPulse — updated hourly.</p>
+    <div class="niches-grid">
+      <a href="dashboard.html" class="niche-card">
+        <div class="niche-rank">#1 · AI/Tech</div>
+        <div class="niche-name">AI Prompts Collection</div>
+        <div class="niche-bar"><div class="niche-fill" style="width:97%;background:#00f5a0"></div></div>
+        <div class="niche-signal" style="color:#00f5a0">⚡ VERY HIGH demand · 97/100</div>
+      </a>
+      <a href="dashboard.html" class="niche-card">
+        <div class="niche-rank">#2 · Business</div>
+        <div class="niche-name">Passive Income Ideas</div>
+        <div class="niche-bar"><div class="niche-fill" style="width:98%;background:#00f5a0"></div></div>
+        <div class="niche-signal" style="color:#00f5a0">⚡ VERY HIGH demand · 98/100</div>
+      </a>
+      <a href="dashboard.html" class="niche-card">
+        <div class="niche-rank">#3 · Productivity</div>
+        <div class="niche-name">Notion Templates Pack</div>
+        <div class="niche-bar"><div class="niche-fill" style="width:94%;background:#00f5a0"></div></div>
+        <div class="niche-signal" style="color:#00f5a0">⚡ VERY HIGH demand · 94/100</div>
+      </a>
+      <a href="dashboard.html" class="niche-card">
+        <div class="niche-rank">#4 · Health</div>
+        <div class="niche-name">Intermittent Fasting Guide</div>
+        <div class="niche-bar"><div class="niche-fill" style="width:93%;background:#4d9fff"></div></div>
+        <div class="niche-signal" style="color:#4d9fff">⚡ HIGH demand · 93/100</div>
+      </a>
+      <a href="dashboard.html" class="niche-card">
+        <div class="niche-rank">#5 · AI/Tech</div>
+        <div class="niche-name">ChatGPT for Business</div>
+        <div class="niche-bar"><div class="niche-fill" style="width:97%;background:#00f5a0"></div></div>
+        <div class="niche-signal" style="color:#00f5a0">⚡ VERY HIGH demand · 97/100</div>
+      </a>
+      <a href="dashboard.html" class="niche-card">
+        <div class="niche-rank">#6 · Wellness</div>
+        <div class="niche-name">Anxiety & Stress Workbook</div>
+        <div class="niche-bar"><div class="niche-fill" style="width:91%;background:#4d9fff"></div></div>
+        <div class="niche-signal" style="color:#4d9fff">⚡ HIGH demand · 91/100</div>
+      </a>
+      <a href="dashboard.html" class="niche-card">
+        <div class="niche-rank">#7 · Design</div>
+        <div class="niche-name">Canva Design Templates</div>
+        <div class="niche-bar"><div class="niche-fill" style="width:91%;background:#4d9fff"></div></div>
+        <div class="niche-signal" style="color:#4d9fff">⚡ HIGH demand · 91/100</div>
+      </a>
+      <a href="dashboard.html" class="niche-card">
+        <div class="niche-rank">#8 · Finance</div>
+        <div class="niche-name">Budget & Finance Tracker</div>
+        <div class="niche-bar"><div class="niche-fill" style="width:89%;background:#4d9fff"></div></div>
+        <div class="niche-signal" style="color:#4d9fff">⚡ HIGH demand · 89/100</div>
+      </a>
+    </div>
+    <div style="text-align:center;margin-top:40px">
+      <a href="dashboard.html" class="btn-hero">See All 32 Niches →</a>
+    </div>
+  </div>
+</div>
+
+<!-- HOW IT WORKS -->
+<div class="section fade-up" id="how">
+  <div class="section-label">How It Works</div>
+  <h2 class="section-title">Simple As That</h2>
+  <p class="section-sub">No setup, no credit card, no complicated tools. Just open it and start finding winning product ideas.</p>
+  <div class="steps-grid">
+    <div class="step-card">
+      <div class="step-num">01</div>
+      <div class="step-title">Open TrendPulse</div>
+      <div class="step-desc">Go to the Digital Products page. See 32 ranked niches with live demand scores from Google, Amazon and Etsy — instantly, no signup needed.</div>
+    </div>
+    <div class="step-card">
+      <div class="step-num">02</div>
+      <div class="step-title">Pick Your Niche</div>
+      <div class="step-desc">Sort by demand score. Click any niche to see Google Trends data, Amazon bestsellers and Etsy search results. Validate your idea in seconds.</div>
+    </div>
+    <div class="step-card">
+      <div class="step-num">03</div>
+      <div class="step-title">Create Your Product</div>
+      <div class="step-desc">Use the Questions page to find exactly what people want to know. Turn those questions into chapters of your PDF, ebook or template.</div>
+    </div>
+    <div class="step-card">
+      <div class="step-num">04</div>
+      <div class="step-title">List & Sell</div>
+      <div class="step-desc">List on Etsy, Gumroad or Amazon KDP. Come back to TrendPulse weekly to stay ahead of trends and find your next product idea.</div>
+    </div>
+  </div>
+</div>
+
+<!-- SOURCES -->
+<div class="sources-bar fade-up">
+  <div class="sources-label">Powered by 15+ live data sources</div>
+  <div class="sources-list">
+    <div class="source-pill"><div class="source-dot" style="background:#00f5a0"></div>Google Trends</div>
+    <div class="source-pill"><div class="source-dot" style="background:#ff4500"></div>Reddit</div>
+    <div class="source-pill"><div class="source-dot" style="background:#ff6314"></div>Hacker News</div>
+    <div class="source-pill"><div class="source-dot" style="background:#4d9fff"></div>Wikipedia</div>
+    <div class="source-pill"><div class="source-dot" style="background:#24292e"></div>GitHub</div>
+    <div class="source-pill"><div class="source-dot" style="background:#ff4d8f"></div>Product Hunt</div>
+    <div class="source-pill"><div class="source-dot" style="background:#ffd60a"></div>CoinGecko</div>
+    <div class="source-pill"><div class="source-dot" style="background:#ff7a2f"></div>DEV.to</div>
+    <div class="source-pill"><div class="source-dot" style="background:#00f5a0"></div>Amazon KDP</div>
+    <div class="source-pill"><div class="source-dot" style="background:#f1641e"></div>Etsy</div>
+    <div class="source-pill"><div class="source-dot" style="background:#4d9fff"></div>Stack Overflow</div>
+    <div class="source-pill"><div class="source-dot" style="background:#00b2ff"></div>Open Library</div>
+    <div class="source-pill"><div class="source-dot" style="background:#00cc88"></div>Remotive Jobs</div>
+    <div class="source-pill"><div class="source-dot" style="background:#ff0000"></div>YouTube</div>
+    <div class="source-pill"><div class="source-dot" style="background:#8888a0"></div>NewsAPI</div>
+  </div>
+</div>
+
+<!-- EMAIL CAPTURE -->
+<div class="email-section fade-up" id="email">
+  <div class="email-card">
+    <div class="email-glow"></div>
+    <div class="email-title">📬 WEEKLY<br>TREND REPORT</div>
+    <p class="email-sub">Every Monday, get the <strong>top 5 trending niches</strong> for digital products — straight to your inbox. Free forever.</p>
+    <form class="email-form" onsubmit="handleSubmit(event)">
+      <input type="email" class="email-input" id="emailInput" placeholder="your@email.com" required/>
+      <button type="submit" class="email-submit">Subscribe Free</button>
+    </form>
+    <p class="email-note">No spam. <strong>Unsubscribe</strong> any time. Sent every Monday morning.</p>
+    <div class="email-success" id="emailSuccess">
+      ✅ You're in! Check your inbox Monday for your first trend report.
+    </div>
+  </div>
+</div>
+
+<!-- FINAL CTA -->
+<div class="cta-section fade-up">
+  <h2 class="cta-title">START FINDING<br><span style="color:var(--accent)">WINNING IDEAS</span><br>TODAY</h2>
+  <p class="cta-sub">Free trend intelligence. No signup required. Start discovering what to create right now.</p>
+  <a href="dashboard.html" class="btn-hero">Launch TrendPulse Free →</a>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-logo">Trend<em>Pulse</em></div>
+  <p>Free trend intelligence for digital product creators.</p>
+  <p style="color:var(--text3);font-size:11px">Data updates hourly · 15+ live sources</p>
+</footer>
+
+<script>
+  // Scroll animations
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+  }, { threshold: 0.1 });
+  document.querySelectorAll('.fade-up').forEach(el => observer.observe(el));
+
+  // Email form
+  function handleSubmit(e) {
+    e.preventDefault();
+    const email = document.getElementById('emailInput').value;
+    // Send to Beehiiv/Mailchimp — replace URL with your embed action
+    // For now store locally and show success
+    const subs = JSON.parse(localStorage.getItem('tp_subscribers') || '[]');
+    subs.push({ email, date: new Date().toISOString() });
+    localStorage.setItem('tp_subscribers', JSON.stringify(subs));
+
+    document.querySelector('.email-form').style.display = 'none';
+    document.getElementById('emailSuccess').style.display = 'block';
+
+    // If you add Beehiiv later, submit here:
+    // fetch('YOUR_BEEHIIV_ENDPOINT', { method:'POST', body: JSON.stringify({ email }) });
+  }
+</script>
+</body>
+</html>

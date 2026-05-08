@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>TrendPulse Weekly Report — Top Digital Product Niches</title>
+  <style>
+    body { margin:0; padding:0; background:#07070d; font-family:'Helvetica Neue',Helvetica,Arial,sans-serif; color:#eeeef5; }
+    .wrapper { max-width:600px; margin:0 auto; padding:20px; }
+    .header { background:#0f0f18; border:1px solid rgba(255,255,255,0.07); border-radius:16px; padding:32px; text-align:center; margin-bottom:16px; }
+    .logo { font-size:28px; font-weight:900; letter-spacing:2px; color:#eeeef5; margin-bottom:8px; }
+    .logo em { font-style:normal; color:#00f5a0; }
+    .header-sub { font-size:13px; color:#8888a0; }
+    .week-label { display:inline-block; margin-top:12px; padding:5px 14px; background:rgba(0,245,160,0.1); border:1px solid rgba(0,245,160,0.25); border-radius:100px; font-size:11px; font-weight:700; color:#00f5a0; letter-spacing:1px; text-transform:uppercase; }
+    .intro { background:#0f0f18; border:1px solid rgba(255,255,255,0.07); border-radius:12px; padding:24px; margin-bottom:16px; font-size:15px; line-height:1.7; color:#8888a0; }
+    .intro strong { color:#eeeef5; }
+    .section-title { font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:2px; color:#00f5a0; margin:24px 0 12px; }
+    .niche-card { background:#0f0f18; border:1px solid rgba(255,255,255,0.07); border-radius:12px; padding:20px; margin-bottom:10px; }
+    .niche-top { display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; }
+    .niche-rank { font-size:11px; color:#44445a; font-family:monospace; }
+    .niche-signal { font-size:10px; font-weight:700; padding:3px 9px; border-radius:100px; }
+    .signal-very-high { background:rgba(0,245,160,0.1); color:#00f5a0; border:1px solid rgba(0,245,160,0.25); }
+    .signal-high { background:rgba(77,159,255,0.1); color:#4d9fff; border:1px solid rgba(77,159,255,0.25); }
+    .niche-name { font-size:18px; font-weight:700; color:#eeeef5; margin-bottom:6px; }
+    .niche-cat { font-size:10px; font-weight:600; text-transform:uppercase; letter-spacing:.8px; color:#8888a0; margin-bottom:10px; }
+    .niche-bar-wrap { height:4px; background:#16161f; border-radius:2px; overflow:hidden; margin-bottom:12px; }
+    .niche-bar-fill { height:100%; border-radius:2px; }
+    .niche-insight { font-size:13px; color:#8888a0; line-height:1.6; margin-bottom:14px; }
+    .niche-links { display:flex; gap:8px; }
+    .niche-link { padding:7px 14px; border-radius:7px; font-size:12px; font-weight:600; text-decoration:none; }
+    .link-google { background:rgba(0,245,160,0.1); color:#00f5a0; border:1px solid rgba(0,245,160,0.2); }
+    .link-amazon { background:rgba(255,122,47,0.1); color:#ff7a2f; border:1px solid rgba(255,122,47,0.2); }
+    .link-etsy { background:rgba(241,100,30,0.1); color:#f1641e; border:1px solid rgba(241,100,30,0.2); }
+    .question-section { background:#0f0f18; border:1px solid rgba(255,255,255,0.07); border-radius:12px; padding:20px; margin-bottom:16px; }
+    .question-item { padding:10px 0; border-bottom:1px solid rgba(255,255,255,0.05); font-size:14px; color:#8888a0; line-height:1.5; }
+    .question-item:last-child { border-bottom:none; padding-bottom:0; }
+    .question-item strong { color:#eeeef5; }
+    .cta-box { background:linear-gradient(135deg, rgba(0,245,160,0.08), rgba(77,159,255,0.05)); border:1px solid rgba(0,245,160,0.2); border-radius:16px; padding:32px; text-align:center; margin-bottom:16px; }
+    .cta-title { font-size:22px; font-weight:900; color:#eeeef5; margin-bottom:10px; letter-spacing:1px; }
+    .cta-sub { font-size:14px; color:#8888a0; margin-bottom:20px; line-height:1.6; }
+    .cta-btn { display:inline-block; padding:14px 32px; background:#00f5a0; color:#000; font-size:14px; font-weight:700; text-decoration:none; border-radius:10px; }
+    .footer { text-align:center; padding:24px; font-size:11px; color:#44445a; line-height:1.8; }
+    .footer a { color:#8888a0; text-decoration:none; }
+  </style>
+</head>
+<body>
+<div class="wrapper">
+
+  <!-- HEADER -->
+  <div class="header">
+    <div class="logo">Trend<em>Pulse</em></div>
+    <div class="header-sub">Weekly Digital Product Intelligence Report</div>
+    <div class="week-label">📅 Week of {{WEEK_DATE}}</div>
+  </div>
+
+  <!-- INTRO -->
+  <div class="intro">
+    Hey 👋<br><br>
+    Here are this week's <strong>top 5 trending niches</strong> for digital products — ebooks, PDFs, templates and guides people are actively searching for and buying right now.<br><br>
+    Each niche includes demand data from <strong>Google Trends, Amazon Bestsellers and Etsy</strong> so you can validate the idea before you create anything.
+  </div>
+
+  <div class="section-title">🔥 Top 5 Niches This Week</div>
+
+  <!-- NICHE 1 -->
+  <div class="niche-card">
+    <div class="niche-top">
+      <div class="niche-rank">#1 This Week</div>
+      <div class="niche-signal signal-very-high">⚡ VERY HIGH demand</div>
+    </div>
+    <div class="niche-name">{{NICHE_1_NAME}}</div>
+    <div class="niche-cat">{{NICHE_1_CATEGORY}} · {{NICHE_1_SCORE}}/100 demand score</div>
+    <div class="niche-bar-wrap"><div class="niche-bar-fill" style="width:{{NICHE_1_SCORE}}%;background:#00f5a0"></div></div>
+    <div class="niche-insight">{{NICHE_1_INSIGHT}}</div>
+    <div class="niche-links">
+      <a href="{{NICHE_1_GOOGLE}}" class="niche-link link-google">Google Trends ↗</a>
+      <a href="{{NICHE_1_AMAZON}}" class="niche-link link-amazon">Amazon ↗</a>
+      <a href="{{NICHE_1_ETSY}}" class="niche-link link-etsy">Etsy ↗</a>
+    </div>
+  </div>
+
+  <!-- NICHE 2 -->
+  <div class="niche-card">
+    <div class="niche-top">
+      <div class="niche-rank">#2 This Week</div>
+      <div class="niche-signal signal-very-high">⚡ VERY HIGH demand</div>
+    </div>
+    <div class="niche-name">{{NICHE_2_NAME}}</div>
+    <div class="niche-cat">{{NICHE_2_CATEGORY}} · {{NICHE_2_SCORE}}/100 demand score</div>
+    <div class="niche-bar-wrap"><div class="niche-bar-fill" style="width:{{NICHE_2_SCORE}}%;background:#00f5a0"></div></div>
+    <div class="niche-insight">{{NICHE_2_INSIGHT}}</div>
+    <div class="niche-links">
+      <a href="{{NICHE_2_GOOGLE}}" class="niche-link link-google">Google Trends ↗</a>
+      <a href="{{NICHE_2_AMAZON}}" class="niche-link link-amazon">Amazon ↗</a>
+      <a href="{{NICHE_2_ETSY}}" class="niche-link link-etsy">Etsy ↗</a>
+    </div>
+  </div>
+
+  <!-- NICHE 3 -->
+  <div class="niche-card">
+    <div class="niche-top">
+      <div class="niche-rank">#3 This Week</div>
+      <div class="niche-signal signal-high">⚡ HIGH demand</div>
+    </div>
+    <div class="niche-name">{{NICHE_3_NAME}}</div>
+    <div class="niche-cat">{{NICHE_3_CATEGORY}} · {{NICHE_3_SCORE}}/100 demand score</div>
+    <div class="niche-bar-wrap"><div class="niche-bar-fill" style="width:{{NICHE_3_SCORE}}%;background:#4d9fff"></div></div>
+    <div class="niche-insight">{{NICHE_3_INSIGHT}}</div>
+    <div class="niche-links">
+      <a href="{{NICHE_3_GOOGLE}}" class="niche-link link-google">Google Trends ↗</a>
+      <a href="{{NICHE_3_AMAZON}}" class="niche-link link-amazon">Amazon ↗</a>
+      <a href="{{NICHE_3_ETSY}}" class="niche-link link-etsy">Etsy ↗</a>
+    </div>
+  </div>
+
+  <!-- NICHE 4 -->
+  <div class="niche-card">
+    <div class="niche-top">
+      <div class="niche-rank">#4 This Week</div>
+      <div class="niche-signal signal-high">⚡ HIGH demand</div>
+    </div>
+    <div class="niche-name">{{NICHE_4_NAME}}</div>
+    <div class="niche-cat">{{NICHE_4_CATEGORY}} · {{NICHE_4_SCORE}}/100 demand score</div>
+    <div class="niche-bar-wrap"><div class="niche-bar-fill" style="width:{{NICHE_4_SCORE}}%;background:#4d9fff"></div></div>
+    <div class="niche-insight">{{NICHE_4_INSIGHT}}</div>
+    <div class="niche-links">
+      <a href="{{NICHE_4_GOOGLE}}" class="niche-link link-google">Google Trends ↗</a>
+      <a href="{{NICHE_4_AMAZON}}" class="niche-link link-amazon">Amazon ↗</a>
+      <a href="{{NICHE_4_ETSY}}" class="niche-link link-etsy">Etsy ↗</a>
+    </div>
+  </div>
+
+  <!-- NICHE 5 -->
+  <div class="niche-card">
+    <div class="niche-top">
+      <div class="niche-rank">#5 This Week</div>
+      <div class="niche-signal signal-high">⚡ HIGH demand</div>
+    </div>
+    <div class="niche-name">{{NICHE_5_NAME}}</div>
+    <div class="niche-cat">{{NICHE_5_CATEGORY}} · {{NICHE_5_SCORE}}/100 demand score</div>
+    <div class="niche-bar-wrap"><div class="niche-bar-fill" style="width:{{NICHE_5_SCORE}}%;background:#4d9fff"></div></div>
+    <div class="niche-insight">{{NICHE_5_INSIGHT}}</div>
+    <div class="niche-links">
+      <a href="{{NICHE_5_GOOGLE}}" class="niche-link link-google">Google Trends ↗</a>
+      <a href="{{NICHE_5_AMAZON}}" class="niche-link link-amazon">Amazon ↗</a>
+      <a href="{{NICHE_5_ETSY}}" class="niche-link link-etsy">Etsy ↗</a>
+    </div>
+  </div>
+
+  <!-- QUESTIONS OF THE WEEK -->
+  <div class="section-title">💬 Questions People Are Asking This Week</div>
+  <div class="question-section">
+    <div class="question-item">💡 <strong>{{QUESTION_1}}</strong> — Great guide or workbook topic</div>
+    <div class="question-item">💡 <strong>{{QUESTION_2}}</strong> — Turn into a step-by-step PDF</div>
+    <div class="question-item">💡 <strong>{{QUESTION_3}}</strong> — Perfect for a beginner's ebook</div>
+    <div class="question-item">💡 <strong>{{QUESTION_4}}</strong> — High purchase intent, great for a template</div>
+    <div class="question-item">💡 <strong>{{QUESTION_5}}</strong> — Bundle into a digital toolkit</div>
+  </div>
+
+  <!-- CTA -->
+  <div class="cta-box">
+    <div class="cta-title">See All 32 Niches Live</div>
+    <div class="cta-sub">The full TrendPulse dashboard shows real-time data from Google, Reddit, Amazon, Etsy and 10+ more sources — completely free.</div>
+    <a href="https://web-production-6bcf6.up.railway.app/dashboard" class="cta-btn">Open TrendPulse Free →</a>
+  </div>
+
+  <!-- FOOTER -->
+  <div class="footer">
+    You're receiving this because you signed up for TrendPulse Weekly.<br>
+    <a href="#">Unsubscribe</a> · <a href="https://web-production-6bcf6.up.railway.app">Visit TrendPulse</a><br><br>
+    TrendPulse — Free trend intelligence for digital product creators.
+  </div>
+
+</div>
+</body>
+</html>

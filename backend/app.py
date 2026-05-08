@@ -60,6 +60,11 @@ except Exception as e:
 # ── SERVE FRONTEND ────────────────────────────────────────────
 @app.route('/')
 def serve_index():
+    return send_from_directory(FRONTEND_DIR, 'landing.html')
+
+@app.route('/dashboard')
+@app.route('/dashboard.html')
+def serve_dashboard():
     return send_from_directory(FRONTEND_DIR, 'index.html')
 
 @app.route('/<path:path>')
