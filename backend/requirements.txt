@@ -2,4 +2,6 @@ flask
 flask-cors
 pytrends
 requests
-psycopg[binary]
+psycopg2-binary
+PyJWT
+bcrypt

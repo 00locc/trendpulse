@@ -189,7 +189,7 @@
 
       <!-- LOGIN -->
       <form id="loginForm" onsubmit="Auth.handleLogin(event)" style="display:flex;flex-direction:column;gap:12px">
-        <button type="button" class="google-auth-btn" onclick="Auth.loginWithGoogle()">Continue with Google</button>
+        <button type="button" class="google-auth-btn" onclick="Auth.loginWithGoogle()"><span class="google-mark" aria-hidden="true">G</span><span>Continue with Google</span></button>
         <div class="auth-divider"><span>or</span></div>
         <div class="api-group"><label>Email</label><input type="email" id="loginEmail" placeholder="your@email.com" required/></div>
         <div class="api-group"><label>Password</label><input type="password" id="loginPassword" placeholder="Your password" required/></div>
@@ -198,7 +198,7 @@
 
       <!-- REGISTER -->
       <form id="registerForm" onsubmit="Auth.handleRegister(event)" style="display:none;flex-direction:column;gap:12px">
-        <button type="button" class="google-auth-btn" onclick="Auth.loginWithGoogle()">Sign up with Google</button>
+        <button type="button" class="google-auth-btn" onclick="Auth.loginWithGoogle()"><span class="google-mark" aria-hidden="true">G</span><span>Sign up with Google</span></button>
         <div class="auth-divider"><span>or</span></div>
         <div class="api-group"><label>Your name</label><input type="text" id="registerName" placeholder="Your name"/></div>
         <div class="api-group"><label>Email</label><input type="email" id="registerEmail" placeholder="your@email.com" required/></div>

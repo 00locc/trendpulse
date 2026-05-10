@@ -228,6 +228,7 @@
     .btn-hero-ghost {
       display: inline-flex;
       align-items: center;
+      justify-content: center;
       gap: 8px;
       padding: 16px 36px;
       background: transparent;
@@ -240,6 +241,21 @@
       cursor: pointer;
       transition: all .25s;
       font-family: var(--fb);
+    }
+    .google-mark {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: conic-gradient(from -45deg,#4285f4 0 25%,#34a853 0 50%,#fbbc05 0 75%,#ea4335 0);
+      color: #fff;
+      font-size: 12px;
+      font-weight: 800;
+      font-family: Arial,sans-serif;
+      line-height: 1;
+      flex: 0 0 20px;
     }
     .btn-hero-ghost:hover { border-color: var(--text2); transform: translateY(-2px); }
     .hero-proof {
@@ -669,7 +685,7 @@
         <svg width="16" height="16" viewBox="0 0 20 20" fill="none"><polyline points="2,14 7,9 11,13 16,6 19,8" stroke="#000" stroke-width="2" stroke-linecap="round"/></svg>
         Sign Up Free
       </a>
-      <a href="/api/auth/google" class="btn-hero-ghost">Continue with Google</a>
+      <a href="/api/auth/google" class="btn-hero-ghost"><span class="google-mark" aria-hidden="true">G</span><span>Continue with Google</span></a>
     </div>
     <div class="hero-proof">
       <div class="proof-item">✓ <span>100% Free</span> — no credit card</div>
