@@ -42,6 +42,26 @@ Click **⚙ API Settings** in the sidebar and add:
 
 ---
 
+## Supabase Setup
+
+TrendPulse uses SQLite locally by default. In production, set one of these environment variables and the Flask backend will use Supabase Postgres instead:
+
+```bash
+SUPABASE_DB_URL=postgresql://postgres.PROJECT_REF:PASSWORD@aws-0-REGION.pooler.supabase.com:6543/postgres?sslmode=require
+# or
+DATABASE_URL=postgresql://postgres.PROJECT_REF:PASSWORD@aws-0-REGION.pooler.supabase.com:6543/postgres?sslmode=require
+```
+
+Also set a real session secret:
+
+```bash
+SECRET_KEY=replace-with-a-long-random-secret
+```
+
+You can either let the app create the tables on boot, or paste `supabase_schema.sql` into Supabase SQL Editor and run it once.
+
+---
+
 ## Features
 
 | View | What You See |

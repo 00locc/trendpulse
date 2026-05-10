@@ -2,3 +2,4 @@ flask
 flask-cors
 pytrends
 requests
+psycopg[binary]

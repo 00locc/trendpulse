@@ -33,6 +33,7 @@ function switchView(view) {
     questions:'What People Ask', youtube:'YouTube Trends', news:'News & Headlines',
     github:'GitHub Trending', devto:'Developer Articles', crypto:'Crypto Intelligence',
     books:'Trending Books', jobs:'Remote Jobs', stackoverflow:'Stack Overflow', alerts:'Spike Alerts',
+    saved:'Saved Library',
   };
   document.getElementById('pageTitle').textContent = titles[view] || view;
   State.currentView = view;
@@ -41,6 +42,7 @@ function switchView(view) {
     questions:loadQuestions, youtube:loadYouTube, news:loadNews,
     github:loadGitHub, devto:loadDevTo, crypto:loadCrypto,
     books:loadBooks, jobs:loadJobs, stackoverflow:loadStackOverflow, alerts:loadAlerts,
+    saved:() => Auth.loadSaved(),
   };
   if (loaders[view] && !State._loaded[view]) loaders[view]();
 }
@@ -368,17 +370,17 @@ async function loadTopics() {
       (source==='all'||source==='github') ? API.getGitHubTrending().catch(()=>[])     : Promise.resolve([]),
     ]);
     const topics=[], matchCat=t=>category==='all'||guessCat(t)===category;
-    google.filter(g=>matchCat(g.term)).forEach(g=>topics.push({ name:g.term,category:guessCat(g.term),sources:['Google'],volume:(g.volume||'')+'K',delta:g.delta||'',url:`https://trends.google.com/trends/explore?q=${encodeURIComponent(g.term)}`,meta:`Trend score: ${g.volume}` }));
-    API.clusterTopics(reddit).slice(0,30).filter(c=>matchCat(c.name)).forEach(c=>topics.push({ name:c.name,category:guessCat(c.name),sources:['Reddit'],volume:formatNum(c.score),delta:'',url:c.url,meta:'Reddit discussion' }));
-    reddit.slice(0,25).filter(p=>matchCat(p.title)).forEach(p=>topics.push({ name:p.title.substring(0,65),category:subToCat(p.subreddit),sources:['Reddit'],volume:formatNum(p.score),delta:'',url:p.url,meta:p.subreddit }));
-    hn.slice(0,20).filter(p=>matchCat(p.title)).forEach(p=>topics.push({ name:p.title.substring(0,65),category:guessCat(p.title),sources:['Hacker News'],volume:formatNum(p.score),delta:'',url:p.url,meta:`${p.score} pts` }));
-    wiki.slice(0,20).forEach(p=>topics.push({ name:p.title,category:guessCat(p.title),sources:['Wikipedia'],volume:formatNum(p.views)+' views',delta:'',url:p.url,meta:'Trending today' }));
-    devto.slice(0,15).filter(a=>matchCat(a.title)).forEach(a=>topics.push({ name:a.title.substring(0,65),category:'technology',sources:['DEV.to'],volume:formatNum(a.reactions)+' ❤',delta:'',url:a.url,meta:(a.tags||[]).slice(0,3).join(' · ') }));
-    github.slice(0,15).forEach(r=>topics.push({ name:r.title,category:'technology',sources:['GitHub'],volume:`⭐ ${formatNum(r.stars)}`,delta:r.starsToday?`+${r.starsToday} today`:'',url:r.url,meta:r.language }));
+    (google||[]).filter(g=>matchCat(g.term)).forEach(g=>topics.push({ name:g.term,category:guessCat(g.term),sources:['Google'],volume:(g.volume||'')+'K',delta:g.delta||'',url:`https://trends.google.com/trends/explore?q=${encodeURIComponent(g.term)}`,meta:`Trend score: ${g.volume}` }));
+    API.clusterTopics(reddit||[]).slice(0,30).filter(c=>matchCat(c.name)).forEach(c=>topics.push({ name:c.name,category:guessCat(c.name),sources:['Reddit'],volume:formatNum(c.score),delta:'',url:c.url,meta:'Reddit discussion' }));
+    (reddit||[]).slice(0,25).filter(p=>matchCat(p.title)).forEach(p=>topics.push({ name:p.title.substring(0,65),category:subToCat(p.subreddit),sources:['Reddit'],volume:formatNum(p.score),delta:'',url:p.url,meta:p.subreddit }));
+    (hn||[]).slice(0,20).filter(p=>matchCat(p.title)).forEach(p=>topics.push({ name:p.title.substring(0,65),category:guessCat(p.title),sources:['Hacker News'],volume:formatNum(p.score),delta:'',url:p.url,meta:`${p.score} pts` }));
+    (wiki||[]).slice(0,20).forEach(p=>topics.push({ name:p.title,category:guessCat(p.title),sources:['Wikipedia'],volume:formatNum(p.views)+' views',delta:'',url:p.url,meta:'Trending today' }));
+    (devto||[]).slice(0,15).filter(a=>matchCat(a.title)).forEach(a=>topics.push({ name:a.title.substring(0,65),category:'technology',sources:['DEV.to'],volume:formatNum(a.reactions)+' ❤',delta:'',url:a.url,meta:(a.tags||[]).slice(0,3).join(' · ') }));
+    (github||[]).slice(0,15).forEach(r=>topics.push({ name:r.title,category:'technology',sources:['GitHub'],volume:`⭐ ${formatNum(r.stars)}`,delta:r.starsToday?`+${r.starsToday} today`:'',url:r.url,meta:r.language }));
     const seen=new Set();
-    const unique=topics.filter(t=>{ const k=t.name.substring(0,20).toLowerCase(); if(seen.has(k)) return false; seen.add(k); return true; });
+    const unique=topics.filter(t=>{ const k=(t.name||'').substring(0,20).toLowerCase(); if(!k||seen.has(k)) return false; seen.add(k); return true; });
     grid.innerHTML=(unique.length?`<div class="results-count">${unique.length} topics found</div>`:'')+(unique.length?unique.slice(0,80).map(t=>renderTopicCard(t)).join(''):'<div class="loading-state full">No topics found — try changing filters</div>');
-  } catch(e) { grid.innerHTML='<div class="loading-state full">Error loading topics</div>'; }
+  } catch(e) { console.error('Topics error:', e); grid.innerHTML='<div class="loading-state full">Error loading topics</div>'; }
 }
 
 function renderTopicCard(t) {
@@ -389,6 +391,7 @@ function renderTopicCard(t) {
     <div class="topic-volume">${t.volume||''}</div>
     ${t.meta?`<div class="topic-meta">${escHtml(t.meta)}</div>`:''}
     ${t.delta?`<div class="trend-delta ${t.delta.startsWith('+')?'up':'down'}">${t.delta}</div>`:''}
+    ${Auth.button({ title:t.name||'Untitled topic', type:'topic', source:(t.sources||[]).join(', '), url, meta:t.meta||t.volume||'', notes:t.delta||'' })}
   </div>`;
 }
 
@@ -437,7 +440,7 @@ async function loadQuestions() {
     el.innerHTML=`<div class="results-count">${display.length} questions</div>`+display.slice(0,80).map(q=>{
       const rUrl=q.url||`https://www.reddit.com/search/?q=${encodeURIComponent(q.text)}&sort=hot&t=week`;
       const gUrl=`https://www.google.com/search?q=${encodeURIComponent(q.text)}`;
-      return `<div class="question-card"><div class="q-top"><div class="q-text">${escHtml(q.text)}</div><span class="q-intent intent-${q.intent}">${intentLabels[q.intent]||q.intent}</span></div><div class="q-meta"><span>Via: <strong>${escHtml(q.subreddit||q.source||'')}</strong></span><span>Score: <strong>${formatNum(q.score)}</strong></span></div><div class="q-actions"><button class="q-btn q-btn-reddit" onclick="openLink('${escAttr(rUrl)}')">Read discussion ↗</button><button class="q-btn q-btn-google" onclick="openLink('${escAttr(gUrl)}')">Search Google ↗</button></div></div>`;
+      return `<div class="question-card"><div class="q-top"><div class="q-text">${escHtml(q.text)}</div><span class="q-intent intent-${q.intent}">${intentLabels[q.intent]||q.intent}</span></div><div class="q-meta"><span>Via: <strong>${escHtml(q.subreddit||q.source||'')}</strong></span><span>Score: <strong>${formatNum(q.score)}</strong></span></div><div class="q-actions"><button class="q-btn q-btn-reddit" onclick="openLink('${escAttr(rUrl)}')">Read discussion ↗</button><button class="q-btn q-btn-google" onclick="openLink('${escAttr(gUrl)}')">Search Google ↗</button>${Auth.button({ title:q.text, type:'question', source:q.subreddit||q.source||'TrendPulse', url:rUrl, meta:`Score ${formatNum(q.score)}`, notes:intentLabels[q.intent]||q.intent })}</div></div>`;
     }).join('');
   } catch(e) { el.innerHTML='<div class="loading-state full">Error loading questions</div>'; }
 }
@@ -573,7 +576,7 @@ async function refreshAll() {
   await loadDashboard();
   const v=State.currentView;
   if (v!=='dashboard') {
-    const loaders={digital:loadDigital,topics:loadTopics,products:loadProducts,questions:loadQuestions,youtube:loadYouTube,news:loadNews,github:loadGitHub,devto:loadDevTo,crypto:loadCrypto,books:loadBooks,jobs:loadJobs,stackoverflow:loadStackOverflow,alerts:loadAlerts};
+    const loaders={digital:loadDigital,topics:loadTopics,products:loadProducts,questions:loadQuestions,youtube:loadYouTube,news:loadNews,github:loadGitHub,devto:loadDevTo,crypto:loadCrypto,books:loadBooks,jobs:loadJobs,stackoverflow:loadStackOverflow,alerts:loadAlerts,saved:() => Auth.loadSaved()};
     if(loaders[v]) loaders[v]();
   }
 }
@@ -621,3 +624,4 @@ function guessCat(t){
   if(['productivity','routine','habit','motivation','mindset','lifestyle','minimalism'].some(k=>t.includes(k)))return'lifestyle';
   return'other';
 }
+

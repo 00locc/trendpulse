@@ -1,65 +1,105 @@
 # ============================================================
-# TrendPulse — Full Stack Server
-# Routes blocked APIs through Python to bypass IP restrictions
+# TrendPulse — Full Stack Server with Auth
+# Flask + Supabase PostgreSQL + JWT Auth
 # ============================================================
 
 from flask import Flask, jsonify, request, send_from_directory
 from flask_cors import CORS
 import os
 import logging
-import requests
-import time
+import jwt
+import bcrypt
+import psycopg2
+import psycopg2.extras
+from datetime import datetime, timedelta
+from functools import wraps
 
 logging.basicConfig(level=logging.INFO)
 
 FRONTEND_DIR = os.path.join(os.path.dirname(__file__), '..', 'frontend')
 app = Flask(__name__, static_folder=FRONTEND_DIR, static_url_path='')
-CORS(app)
+CORS(app, supports_credentials=True)
 
-# Rotating user agents to avoid blocks
-USER_AGENTS = [
-    'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-    'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-    'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-]
-_ua_index = 0
-def get_ua():
-    global _ua_index
-    ua = USER_AGENTS[_ua_index % len(USER_AGENTS)]
-    _ua_index += 1
-    return ua
+# ── ENV VARS ──────────────────────────────────────────────────
+DATABASE_URL = os.environ.get('DATABASE_URL', '')
+JWT_SECRET   = os.environ.get('JWT_SECRET', 'fallback-secret-change-this')
 
-def safe_get(url, headers=None, timeout=8, retries=2):
-    """GET with retries and rotating user agent."""
-    h = {'User-Agent': get_ua(), 'Accept': 'application/json'}
-    if headers:
-        h.update(headers)
-    for attempt in range(retries):
+# ── DATABASE ──────────────────────────────────────────────────
+def get_db():
+    try:
+        conn = psycopg2.connect(DATABASE_URL, sslmode='require')
+        return conn
+    except Exception as e:
+        logging.error(f'DB connection error: {e}')
+        return None
+
+def init_db():
+    conn = get_db()
+    if not conn:
+        logging.error('Could not connect to database')
+        return
+    try:
+        cur = conn.cursor()
+        # Users table
+        cur.execute('''
+            CREATE TABLE IF NOT EXISTS users (
+                id SERIAL PRIMARY KEY,
+                email VARCHAR(255) UNIQUE NOT NULL,
+                password_hash VARCHAR(255) NOT NULL,
+                name VARCHAR(255),
+                created_at TIMESTAMP DEFAULT NOW()
+            )
+        ''')
+        # Saves table — stores anything a user bookmarks
+        cur.execute('''
+            CREATE TABLE IF NOT EXISTS saves (
+                id SERIAL PRIMARY KEY,
+                user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+                type VARCHAR(50) NOT NULL,
+                title VARCHAR(500) NOT NULL,
+                url VARCHAR(1000),
+                data JSONB,
+                notes TEXT,
+                created_at TIMESTAMP DEFAULT NOW()
+            )
+        ''')
+        conn.commit()
+        cur.close()
+        conn.close()
+        logging.info('✓ Database tables ready')
+    except Exception as e:
+        logging.error(f'DB init error: {e}')
+        conn.close()
+
+# ── JWT HELPERS ───────────────────────────────────────────────
+def create_token(user_id, email):
+    payload = {
+        'user_id': user_id,
+        'email': email,
+        'exp': datetime.utcnow() + timedelta(days=30)
+    }
+    return jwt.encode(payload, JWT_SECRET, algorithm='HS256')
+
+def token_required(f):
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        token = request.headers.get('Authorization', '').replace('Bearer ', '')
+        if not token:
+            return jsonify({'error': 'No token provided'}), 401
         try:
-            r = requests.get(url, headers=h, timeout=timeout)
-            if r.status_code == 429:
-                time.sleep(1.5 * (attempt + 1))
-                continue
-            return r
-        except Exception as e:
-            logging.warning(f'Attempt {attempt+1} failed for {url}: {e}')
-            if attempt < retries - 1:
-                time.sleep(1)
-    return None
-
-try:
-    from pytrends.request import TrendReq
-    pytrends = TrendReq(hl='en-US', tz=360)
-    PYTRENDS_OK = True
-    print('✓ pytrends loaded')
-except Exception as e:
-    PYTRENDS_OK = False
-    print(f'pytrends unavailable: {e}')
-
+            data = jwt.decode(token, JWT_SECRET, algorithms=['HS256'])
+            request.user_id = data['user_id']
+            request.user_email = data['email']
+        except jwt.ExpiredSignatureError:
+            return jsonify({'error': 'Token expired'}), 401
+        except jwt.InvalidTokenError:
+            return jsonify({'error': 'Invalid token'}), 401
+        return f(*args, **kwargs)
+    return decorated
 
 # ── SERVE FRONTEND ────────────────────────────────────────────
 @app.route('/')
-def serve_index():
+def serve_landing():
     return send_from_directory(FRONTEND_DIR, 'landing.html')
 
 @app.route('/dashboard')
@@ -72,151 +112,223 @@ def serve_static(path):
     full = os.path.join(FRONTEND_DIR, path)
     if os.path.isfile(full):
         return send_from_directory(FRONTEND_DIR, path)
-    return send_from_directory(FRONTEND_DIR, 'index.html')
+    return send_from_directory(FRONTEND_DIR, 'landing.html')
 
+# ── AUTH ROUTES ───────────────────────────────────────────────
+@app.route('/api/auth/register', methods=['POST'])
+def register():
+    data = request.get_json()
+    email    = (data.get('email') or '').strip().lower()
+    password = (data.get('password') or '').strip()
+    name     = (data.get('name') or '').strip()
 
-# ── PROXY: REDDIT ─────────────────────────────────────────────
-@app.route('/api/reddit')
-def proxy_reddit():
-    subreddit = request.args.get('sub', 'all')
-    limit     = request.args.get('limit', '20')
-    url = f'https://www.reddit.com/r/{subreddit}/hot.json?limit={limit}&t=day'
-    r = safe_get(url, headers={'Accept': 'application/json'})
-    if not r or not r.ok:
-        return jsonify([])
+    if not email or not password:
+        return jsonify({'error': 'Email and password required'}), 400
+    if len(password) < 6:
+        return jsonify({'error': 'Password must be at least 6 characters'}), 400
+
+    conn = get_db()
+    if not conn:
+        return jsonify({'error': 'Database unavailable'}), 500
+
     try:
-        data = r.json()
-        posts = []
-        cutoff = time.time() - 72 * 3600
-        for child in data.get('data', {}).get('children', []):
-            p = child['data']
-            if p.get('created_utc', 0) < cutoff and p.get('score', 0) < 300:
-                continue
-            posts.append({
-                'source':    'Reddit',
-                'title':     p.get('title', ''),
-                'subreddit': p.get('subreddit_name_prefixed', ''),
-                'score':     p.get('score', 0),
-                'comments':  p.get('num_comments', 0),
-                'url':       f"https://reddit.com{p.get('permalink', '')}",
-                'created':   p.get('created_utc', 0),
-            })
-        return jsonify(posts)
+        cur = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+        # Check if email exists
+        cur.execute('SELECT id FROM users WHERE email = %s', (email,))
+        if cur.fetchone():
+            return jsonify({'error': 'Email already registered'}), 409
+
+        # Hash password
+        pw_hash = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
+
+        # Insert user
+        cur.execute(
+            'INSERT INTO users (email, password_hash, name) VALUES (%s, %s, %s) RETURNING id, email, name',
+            (email, pw_hash, name)
+        )
+        user = cur.fetchone()
+        conn.commit()
+        cur.close()
+        conn.close()
+
+        token = create_token(user['id'], user['email'])
+        return jsonify({
+            'token': token,
+            'user': { 'id': user['id'], 'email': user['email'], 'name': user['name'] }
+        }), 201
+
     except Exception as e:
-        logging.error(f'Reddit proxy error: {e}')
-        return jsonify([])
+        logging.error(f'Register error: {e}')
+        conn.close()
+        return jsonify({'error': 'Registration failed'}), 500
 
 
-# ── PROXY: CRYPTO TRENDING ────────────────────────────────────
-@app.route('/api/crypto/trending')
-def proxy_crypto_trending():
-    r = safe_get('https://api.coingecko.com/api/v3/search/trending')
-    if not r or not r.ok:
-        return jsonify(_demo_crypto_trending())
+@app.route('/api/auth/login', methods=['POST'])
+def login():
+    data = request.get_json()
+    email    = (data.get('email') or '').strip().lower()
+    password = (data.get('password') or '').strip()
+
+    if not email or not password:
+        return jsonify({'error': 'Email and password required'}), 400
+
+    conn = get_db()
+    if not conn:
+        return jsonify({'error': 'Database unavailable'}), 500
+
     try:
-        data = r.json()
-        coins = []
-        for c in data.get('coins', []):
-            item = c.get('item', {})
-            coins.append({
-                'source': 'CoinGecko',
-                'name':   item.get('name', ''),
-                'symbol': item.get('symbol', ''),
-                'rank':   item.get('market_cap_rank', 0),
-                'url':    f"https://www.coingecko.com/en/coins/{item.get('id', '')}",
-            })
-        return jsonify(coins if coins else _demo_crypto_trending())
+        cur = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+        cur.execute('SELECT * FROM users WHERE email = %s', (email,))
+        user = cur.fetchone()
+        cur.close()
+        conn.close()
+
+        if not user:
+            return jsonify({'error': 'Invalid email or password'}), 401
+
+        if not bcrypt.checkpw(password.encode('utf-8'), user['password_hash'].encode('utf-8')):
+            return jsonify({'error': 'Invalid email or password'}), 401
+
+        token = create_token(user['id'], user['email'])
+        return jsonify({
+            'token': token,
+            'user': { 'id': user['id'], 'email': user['email'], 'name': user['name'] }
+        })
+
     except Exception as e:
-        logging.error(f'Crypto trending error: {e}')
-        return jsonify(_demo_crypto_trending())
+        logging.error(f'Login error: {e}')
+        conn.close()
+        return jsonify({'error': 'Login failed'}), 500
 
 
-# ── PROXY: CRYPTO PRICES ──────────────────────────────────────
-@app.route('/api/crypto/prices')
-def proxy_crypto_prices():
-    ids = 'bitcoin,ethereum,solana,cardano,dogecoin,ripple,polkadot,chainlink,uniswap,avalanche-2'
-    url = f'https://api.coingecko.com/api/v3/simple/price?ids={ids}&vs_currencies=usd&include_24hr_change=true&include_market_cap=true'
-    r = safe_get(url)
-    if not r or not r.ok:
-        return jsonify(_demo_crypto_prices())
+@app.route('/api/auth/me', methods=['GET'])
+@token_required
+def get_me():
+    conn = get_db()
+    if not conn:
+        return jsonify({'error': 'Database unavailable'}), 500
     try:
-        data = r.json()
-        prices = []
-        for coin_id, v in data.items():
-            prices.append({
-                'source': 'CoinGecko',
-                'name':   coin_id.replace('-', ' ').title(),
-                'price':  v.get('usd', 0),
-                'change': round(v.get('usd_24h_change', 0), 2),
-                'mcap':   v.get('usd_market_cap', 0),
-                'url':    f'https://www.coingecko.com/en/coins/{coin_id}',
-            })
-        return jsonify(prices if prices else _demo_crypto_prices())
+        cur = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+        cur.execute('SELECT id, email, name, created_at FROM users WHERE id = %s', (request.user_id,))
+        user = cur.fetchone()
+        cur.close()
+        conn.close()
+        if not user:
+            return jsonify({'error': 'User not found'}), 404
+        return jsonify({ 'user': dict(user) })
     except Exception as e:
-        logging.error(f'Crypto prices error: {e}')
-        return jsonify(_demo_crypto_prices())
+        conn.close()
+        return jsonify({'error': str(e)}), 500
 
-
-# ── PROXY: HACKER NEWS ───────────────────────────────────────
-@app.route('/api/hn')
-def proxy_hn():
-    feed  = request.args.get('feed', 'topstories')
-    count = int(request.args.get('count', '20'))
-    r = safe_get(f'https://hacker-news.firebaseio.com/v0/{feed}.json')
-    if not r or not r.ok:
-        return jsonify(_demo_hn())
+# ── SAVES ROUTES ──────────────────────────────────────────────
+@app.route('/api/saves', methods=['GET'])
+@token_required
+def get_saves():
+    conn = get_db()
+    if not conn:
+        return jsonify({'error': 'Database unavailable'}), 500
     try:
-        ids = r.json()[:count]
-        items = []
-        for id_ in ids:
-            ir = safe_get(f'https://hacker-news.firebaseio.com/v0/item/{id_}.json', timeout=4)
-            if ir and ir.ok:
-                s = ir.json()
-                if s and s.get('title'):
-                    items.append({
-                        'source':   'Hacker News',
-                        'title':    s.get('title', ''),
-                        'score':    s.get('score', 0),
-                        'comments': s.get('descendants', 0),
-                        'by':       s.get('by', ''),
-                        'url':      s.get('url') or f"https://news.ycombinator.com/item?id={s.get('id')}",
-                        'created':  s.get('time', 0),
-                    })
-        return jsonify(items if items else _demo_hn())
+        cur = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+        cur.execute(
+            'SELECT * FROM saves WHERE user_id = %s ORDER BY created_at DESC',
+            (request.user_id,)
+        )
+        saves = cur.fetchall()
+        cur.close()
+        conn.close()
+        return jsonify({ 'saves': [dict(s) for s in saves] })
     except Exception as e:
-        logging.error(f'HN error: {e}')
-        return jsonify(_demo_hn())
+        conn.close()
+        return jsonify({'error': str(e)}), 500
 
 
-# ── PROXY: WIKIPEDIA ─────────────────────────────────────────
-@app.route('/api/wikipedia')
-def proxy_wikipedia():
-    from datetime import datetime, timedelta
-    d = datetime.now() - timedelta(days=1)
-    url = f"https://wikimedia.org/api/rest_v1/metrics/pageviews/top/en.wikipedia/all-access/{d.year}/{d.month:02d}/{d.day:02d}"
-    r = safe_get(url)
-    if not r or not r.ok:
-        return jsonify([])
+@app.route('/api/saves', methods=['POST'])
+@token_required
+def add_save():
+    data  = request.get_json()
+    title = (data.get('title') or '').strip()
+    stype = (data.get('type') or 'topic').strip()
+    url   = (data.get('url') or '').strip()
+    extra = data.get('data') or {}
+    notes = (data.get('notes') or '').strip()
+
+    if not title:
+        return jsonify({'error': 'Title required'}), 400
+
+    conn = get_db()
+    if not conn:
+        return jsonify({'error': 'Database unavailable'}), 500
     try:
-        data = r.json()
-        skip = ['Main_Page', 'Special:', 'Wikipedia:', 'Portal:', 'Help:', 'File:']
-        articles = []
-        for a in (data.get('items', [{}])[0].get('articles', []))[:25]:
-            if any(a['article'].startswith(s) for s in skip):
-                continue
-            articles.append({
-                'source': 'Wikipedia',
-                'title':  a['article'].replace('_', ' '),
-                'views':  a['views'],
-                'url':    f"https://en.wikipedia.org/wiki/{a['article']}",
-            })
-        return jsonify(articles)
+        cur = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+        import json
+        cur.execute(
+            'INSERT INTO saves (user_id, type, title, url, data, notes) VALUES (%s, %s, %s, %s, %s, %s) RETURNING *',
+            (request.user_id, stype, title, url, json.dumps(extra), notes)
+        )
+        save = cur.fetchone()
+        conn.commit()
+        cur.close()
+        conn.close()
+        return jsonify({ 'save': dict(save) }), 201
     except Exception as e:
-        logging.error(f'Wikipedia error: {e}')
-        return jsonify([])
+        conn.close()
+        return jsonify({'error': str(e)}), 500
 
 
-# ── GOOGLE TRENDS ────────────────────────────────────────────
+@app.route('/api/saves/<int:save_id>', methods=['DELETE'])
+@token_required
+def delete_save(save_id):
+    conn = get_db()
+    if not conn:
+        return jsonify({'error': 'Database unavailable'}), 500
+    try:
+        cur = conn.cursor()
+        cur.execute(
+            'DELETE FROM saves WHERE id = %s AND user_id = %s',
+            (save_id, request.user_id)
+        )
+        conn.commit()
+        cur.close()
+        conn.close()
+        return jsonify({ 'deleted': True })
+    except Exception as e:
+        conn.close()
+        return jsonify({'error': str(e)}), 500
+
+
+@app.route('/api/saves/<int:save_id>', methods=['PATCH'])
+@token_required
+def update_save(save_id):
+    data  = request.get_json()
+    notes = (data.get('notes') or '').strip()
+    conn  = get_db()
+    if not conn:
+        return jsonify({'error': 'Database unavailable'}), 500
+    try:
+        cur = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+        cur.execute(
+            'UPDATE saves SET notes = %s WHERE id = %s AND user_id = %s RETURNING *',
+            (notes, save_id, request.user_id)
+        )
+        save = cur.fetchone()
+        conn.commit()
+        cur.close()
+        conn.close()
+        return jsonify({ 'save': dict(save) })
+    except Exception as e:
+        conn.close()
+        return jsonify({'error': str(e)}), 500
+
+# ── GOOGLE TRENDS ─────────────────────────────────────────────
+try:
+    from pytrends.request import TrendReq
+    pytrends = TrendReq(hl='en-US', tz=360)
+    PYTRENDS_OK = True
+    print('✓ pytrends loaded')
+except Exception as e:
+    PYTRENDS_OK = False
+    print(f'pytrends unavailable: {e}')
+
 @app.route('/api/trends')
 def get_trends():
     if not PYTRENDS_OK:
@@ -224,40 +336,36 @@ def get_trends():
     raw_kw    = request.args.get('kw', 'AI tools,side hustle,meal prep')
     kw_list   = [k.strip() for k in raw_kw.split(',')][:5]
     timeframe = request.args.get('tf', 'today 1-m')
-    geo       = request.args.get('geo', '')
     try:
-        pytrends.build_payload(kw_list, cat=0, timeframe=timeframe, geo=geo)
+        pytrends.build_payload(kw_list, cat=0, timeframe=timeframe, geo='')
         df = pytrends.interest_over_time()
         if df.empty:
             return jsonify(_demo_trends())
-        df = df.drop(columns=['isPartial'], errors='ignore')
-        labels   = [str(d.date()) for d in df.index.tolist()]
+        df     = df.drop(columns=['isPartial'], errors='ignore')
+        labels = [str(d.date()) for d in df.index.tolist()]
         datasets = {kw: df[kw].tolist() for kw in kw_list if kw in df.columns}
-        return jsonify({'labels': labels, 'datasets': datasets, 'keywords': kw_list})
+        return jsonify({'labels': labels, 'datasets': datasets})
     except Exception as e:
         logging.error(f'Trends error: {e}')
         return jsonify(_demo_trends())
 
-
 @app.route('/api/trending')
-def get_trending_searches():
-    country = request.args.get('country', 'united_states')
+def get_trending():
     if not PYTRENDS_OK:
         return jsonify(_demo_trending())
+    country = request.args.get('country', 'united_states')
     try:
         df = pytrends.trending_searches(pn=country)
         trends = [
-            {'term': str(row[0]), 'volume': max(1, 100 - i), 'delta': f'+{max(5, 60 - i*3)}%', 'rank': i + 1}
+            {'term': str(row[0]), 'volume': max(1, 100 - i), 'delta': f'+{max(5, 60 - i*3)}%', 'rank': i+1}
             for i, row in df.iterrows()
         ]
-        return jsonify(trends[:20] if trends else _demo_trending())
+        return jsonify(trends[:20])
     except Exception as e:
-        logging.error(f'Trending error: {e}')
         return jsonify(_demo_trending())
 
-
 @app.route('/api/related')
-def get_related_queries():
+def get_related():
     if not PYTRENDS_OK:
         return jsonify({'top': [], 'rising': []})
     kw = request.args.get('kw', 'AI tools')
@@ -274,72 +382,31 @@ def get_related_queries():
     except Exception as e:
         return jsonify({'top': [], 'rising': []})
 
-
 @app.route('/api/health')
 def health():
-    return jsonify({'status': 'ok', 'pytrends': PYTRENDS_OK})
+    return jsonify({'status': 'ok', 'pytrends': PYTRENDS_OK, 'db': bool(DATABASE_URL)})
 
-
-# ── DEMO FALLBACKS ────────────────────────────────────────────
 def _demo_trends():
-    days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
-    return {
-        'labels': days,
-        'datasets': {
-            'AI tools':    [42, 51, 48, 61, 72, 66, 81],
-            'side hustle': [31, 36, 32, 45, 51, 47, 58],
-            'meal prep':   [18, 21, 20, 27, 32, 30, 36],
-        }
-    }
+    return { 'labels': ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'], 'datasets': { 'AI tools': [42,51,48,61,72,66,81], 'side hustle': [31,36,32,45,51,47,58], 'meal prep': [18,21,20,27,32,30,36] } }
 
 def _demo_trending():
     return [
-        {'term': 'AI productivity tools',   'volume': 92, 'delta': '+41%', 'rank': 1},
-        {'term': 'side hustle ideas',        'volume': 78, 'delta': '+28%', 'rank': 2},
-        {'term': 'meal prep for beginners',  'volume': 64, 'delta': '+15%', 'rank': 3},
-        {'term': 'remote work setup',        'volume': 57, 'delta': '+8%',  'rank': 4},
-        {'term': 'passive income ideas',     'volume': 51, 'delta': '+33%', 'rank': 5},
-        {'term': 'home gym equipment',       'volume': 44, 'delta': '-5%',  'rank': 6},
-        {'term': 'ChatGPT alternatives',     'volume': 35, 'delta': '+62%', 'rank': 7},
-        {'term': 'notion templates',         'volume': 19, 'delta': '+88%', 'rank': 8},
-        {'term': 'canva templates',          'volume': 18, 'delta': '+72%', 'rank': 9},
-        {'term': 'amazon kdp',               'volume': 17, 'delta': '+65%', 'rank': 10},
+        {'term':'AI productivity tools','volume':92,'delta':'+41%','rank':1},
+        {'term':'side hustle ideas','volume':78,'delta':'+28%','rank':2},
+        {'term':'meal prep for beginners','volume':64,'delta':'+15%','rank':3},
+        {'term':'passive income ideas','volume':51,'delta':'+33%','rank':4},
+        {'term':'notion templates','volume':44,'delta':'+88%','rank':5},
+        {'term':'canva templates','volume':38,'delta':'+72%','rank':6},
+        {'term':'amazon kdp','volume':35,'delta':'+65%','rank':7},
+        {'term':'chatgpt prompts','volume':30,'delta':'+55%','rank':8},
+        {'term':'print on demand','volume':26,'delta':'+48%','rank':9},
+        {'term':'digital products etsy','volume':22,'delta':'+40%','rank':10},
     ]
-
-def _demo_crypto_trending():
-    return [
-        {'source':'CoinGecko','name':'Bitcoin','symbol':'BTC','rank':1,'url':'https://www.coingecko.com/en/coins/bitcoin'},
-        {'source':'CoinGecko','name':'Ethereum','symbol':'ETH','rank':2,'url':'https://www.coingecko.com/en/coins/ethereum'},
-        {'source':'CoinGecko','name':'Solana','symbol':'SOL','rank':5,'url':'https://www.coingecko.com/en/coins/solana'},
-        {'source':'CoinGecko','name':'Dogecoin','symbol':'DOGE','rank':8,'url':'https://www.coingecko.com/en/coins/dogecoin'},
-        {'source':'CoinGecko','name':'Chainlink','symbol':'LINK','rank':15,'url':'https://www.coingecko.com/en/coins/chainlink'},
-        {'source':'CoinGecko','name':'Avalanche','symbol':'AVAX','rank':12,'url':'https://www.coingecko.com/en/coins/avalanche'},
-        {'source':'CoinGecko','name':'Uniswap','symbol':'UNI','rank':20,'url':'https://www.coingecko.com/en/coins/uniswap'},
-    ]
-
-def _demo_crypto_prices():
-    return [
-        {'source':'CoinGecko','name':'Bitcoin','price':67420,'change':2.34,'mcap':1320000000000,'url':'https://www.coingecko.com/en/coins/bitcoin'},
-        {'source':'CoinGecko','name':'Ethereum','price':3521,'change':1.87,'mcap':423000000000,'url':'https://www.coingecko.com/en/coins/ethereum'},
-        {'source':'CoinGecko','name':'Solana','price':178,'change':3.21,'mcap':82000000000,'url':'https://www.coingecko.com/en/coins/solana'},
-        {'source':'CoinGecko','name':'Cardano','price':0.62,'change':-0.84,'mcap':21000000000,'url':'https://www.coingecko.com/en/coins/cardano'},
-        {'source':'CoinGecko','name':'Dogecoin','price':0.18,'change':4.12,'mcap':25000000000,'url':'https://www.coingecko.com/en/coins/dogecoin'},
-        {'source':'CoinGecko','name':'Ripple','price':0.58,'change':1.23,'mcap':32000000000,'url':'https://www.coingecko.com/en/coins/ripple'},
-    ]
-
-def _demo_hn():
-    return [
-        {'source':'Hacker News','title':'Show HN: TrendPulse — find trending digital product niches','score':842,'comments':134,'url':'https://news.ycombinator.com','created':0,'by':'founder'},
-        {'source':'Hacker News','title':'Ask HN: Best ways to monetize a content site in 2025?','score':671,'comments':198,'url':'https://news.ycombinator.com','created':0,'by':'hacker'},
-        {'source':'Hacker News','title':'The state of AI tools in 2025','score':1240,'comments':312,'url':'https://news.ycombinator.com','created':0,'by':'airesearcher'},
-        {'source':'Hacker News','title':'How I got to $10K MRR selling templates','score':934,'comments':167,'url':'https://news.ycombinator.com','created':0,'by':'indiehacker'},
-        {'source':'Hacker News','title':'Notion alternatives compared: which is best in 2025?','score':523,'comments':89,'url':'https://news.ycombinator.com','created':0,'by':'productivitynerd'},
-    ]
-
 
 # ── START ─────────────────────────────────────────────────────
 if __name__ == '__main__':
+    init_db()
     port  = int(os.environ.get('PORT', 5000))
     debug = os.environ.get('RAILWAY_ENVIRONMENT') is None
-    print(f'\n{"="*50}\n  TrendPulse on port {port}\n{"="*50}\n')
+    print(f'\n{"="*50}\n  TrendPulse running on port {port}\n{"="*50}\n')
     app.run(host='0.0.0.0', port=port, debug=debug)

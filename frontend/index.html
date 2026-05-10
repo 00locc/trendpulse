@@ -8,6 +8,28 @@
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Outfit:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
   <link rel="stylesheet" href="css/style.css"/>
   <link rel="stylesheet" href="css/digital.css"/>
+  <style>
+    .btn-auth-ghost{padding:7px 16px;border:1px solid var(--border);border-radius:8px;color:var(--text2);font-size:12px;font-weight:600;background:transparent;cursor:pointer;font-family:var(--fb);transition:all .2s}
+    .btn-auth-ghost:hover{border-color:var(--accent);color:var(--accent)}
+    .btn-auth-primary{padding:7px 16px;border:none;border-radius:8px;color:#000;font-size:12px;font-weight:700;background:var(--accent);cursor:pointer;font-family:var(--fb);transition:all .2s}
+    .btn-auth-primary:hover{background:var(--accent2)}
+    .save-btn-icon{background:transparent;border:1px solid var(--border);color:var(--text3);border-radius:6px;padding:4px 8px;font-size:13px;cursor:pointer;transition:all .2s;line-height:1}
+    .save-btn-icon:hover{border-color:var(--accent);color:var(--accent)}
+    .save-btn-icon.saved{color:var(--accent);border-color:var(--accent);background:rgba(0,245,160,0.1)}
+    .saves-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:10px;margin-bottom:8px}
+    .save-item{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:16px}
+    .save-item-top{display:flex;justify-content:space-between;align-items:flex-start;gap:8px;margin-bottom:8px}
+    .save-title{font-size:14px;font-weight:600;line-height:1.3}
+    .save-delete-btn{background:transparent;border:none;color:var(--text3);cursor:pointer;font-size:12px;padding:2px 6px;border-radius:4px;flex-shrink:0}
+    .save-delete-btn:hover{color:var(--pink);background:rgba(255,77,143,0.1)}
+    .save-notes{font-size:12px;color:var(--text2);margin-bottom:8px;line-height:1.5}
+    .save-meta{font-size:10px;color:var(--text3);margin-bottom:6px}
+    .save-link{font-size:11px;color:var(--accent);text-decoration:none;font-weight:600}
+    .auth-modal{max-width:420px}
+    .auth-error{padding:10px 14px;background:rgba(255,77,143,0.1);border:1px solid rgba(255,77,143,0.3);border-radius:8px;color:#ff4d8f;font-size:13px;margin-bottom:14px;display:none}
+    .auth-switch{text-align:center;font-size:13px;color:var(--text2);margin-top:14px}
+    .auth-switch a{color:var(--accent);text-decoration:none;font-weight:600}
+  </style>
 </head>
 <body>
 <div class="noise"></div>
@@ -21,9 +43,10 @@
     <div class="nav-label">Overview</div>
     <a href="#" class="nav-item active" data-view="dashboard"><svg viewBox="0 0 20 20" fill="none"><rect x="2" y="2" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="1.5"/><rect x="11" y="2" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="1.5"/><rect x="2" y="11" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="1.5"/><rect x="11" y="11" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="1.5"/></svg>Dashboard</a>
     <a href="#" class="nav-item" data-view="alerts"><svg viewBox="0 0 20 20" fill="none"><path d="M10 2a6 6 0 0 1 6 6c0 3.5 1.5 5 1.5 5h-15S4 11.5 4 8a6 6 0 0 1 6-6z" stroke="currentColor" stroke-width="1.5"/><path d="M8.3 17a2 2 0 0 0 3.4 0" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>Spike Alerts</a>
+    <a href="#" class="nav-item" data-view="saves"><svg viewBox="0 0 20 20" fill="none"><path d="M5 3h10a1 1 0 0 1 1 1v13l-6-3-6 3V4a1 1 0 0 1 1-1z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>My Saves</a>
 
     <div class="nav-label" style="color:var(--accent);border-left:2px solid var(--accent);padding-left:6px;margin-left:-6px;">⭐ For Creators</div>
-    <a href="#" class="nav-item nav-item-star" data-view="digital"><svg viewBox="0 0 20 20" fill="none"><path d="M4 14V7a6 6 0 0 1 12 0v7" stroke="currentColor" stroke-width="1.5"/><rect x="2" y="13" width="16" height="5" rx="1.5" stroke="currentColor" stroke-width="1.5"/><path d="M8 13v-2a2 2 0 0 1 4 0v2" stroke="currentColor" stroke-width="1.2"/></svg>Digital Products</a>
+    <a href="#" class="nav-item nav-item-star" data-view="digital"><svg viewBox="0 0 20 20" fill="none"><path d="M4 14V7a6 6 0 0 1 12 0v7" stroke="currentColor" stroke-width="1.5"/><rect x="2" y="13" width="16" height="5" rx="1.5" stroke="currentColor" stroke-width="1.5"/></svg>Digital Products</a>
 
     <div class="nav-label">Discover</div>
     <a href="#" class="nav-item" data-view="topics"><svg viewBox="0 0 20 20" fill="none"><path d="M3 5h14M3 10h10M3 15h7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>All Topics</a>
@@ -48,7 +71,7 @@
       <div class="status-row"><span class="dot green"></span>Reddit · HN · Wikipedia</div>
       <div class="status-row"><span class="dot green"></span>GitHub · DEV.to · SO</div>
       <div class="status-row"><span class="dot green"></span>CoinGecko · Open Library</div>
-      <div class="status-row"><span class="dot green"></span>YouTube · NewsAPI · Google Trends</div>
+      <div class="status-row"><span class="dot green"></span>YouTube · NewsAPI · Trends</div>
     </div>
   </div>
 </aside>
@@ -62,7 +85,7 @@
     <div class="topbar-right">
       <div class="search-wrap">
         <svg viewBox="0 0 20 20" fill="none" width="14" height="14"><circle cx="9" cy="9" r="6" stroke="currentColor" stroke-width="1.5"/><path d="M14 14l3.5 3.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
-        <input type="text" id="searchInput" placeholder="Search topics, products, questions..." />
+        <input type="text" id="searchInput" placeholder="Search topics, products, questions..."/>
       </div>
       <div class="time-tabs">
         <button class="tt active" data-range="24h">24h</button>
@@ -73,12 +96,19 @@
         <svg viewBox="0 0 20 20" fill="none" width="14"><path d="M17 10A7 7 0 1 1 10 3v2.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><polyline points="10,1 10,5.5 14,3.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
         Refresh
       </button>
+      <div id="authButtons" style="display:flex;gap:8px;align-items:center">
+        <button class="btn-auth-ghost" onclick="Auth.showAuthModal('login')">Log in</button>
+        <button class="btn-auth-primary" onclick="Auth.showAuthModal('register')">Sign up free</button>
+      </div>
+      <div id="userMenu" style="display:none;align-items:center;gap:8px">
+        <button class="btn-auth-ghost" onclick="switchView('saves')">📌 My Saves</button>
+        <span style="font-size:13px;color:var(--text2)">Hi, <strong id="userName"></strong></span>
+        <button class="btn-auth-ghost" onclick="Auth.logout()">Log out</button>
+      </div>
     </div>
   </header>
 
   <div class="views">
-
-    <!-- DASHBOARD -->
     <section class="view active" id="view-dashboard">
       <div class="metrics-row">
         <div class="metric-card"><div class="metric-label">Total Signals</div><div class="metric-value" id="m-signals">—</div><div class="metric-delta up" id="m-signals-delta">Loading...</div></div>
@@ -88,7 +118,7 @@
       </div>
       <div class="dashboard-grid">
         <div class="panel chart-panel">
-          <div class="panel-header"><div class="panel-title">⚡ Live Trend Pulse — Top Signal Per Source</div><div id="pulseUpdated" style="font-size:10px;color:var(--text3)">Updated just now</div></div>
+          <div class="panel-header"><div class="panel-title">⚡ Live Trend Pulse</div><div id="pulseUpdated" style="font-size:10px;color:var(--text3)">Updated just now</div></div>
           <div class="pulse-grid" id="pulsePanels"></div>
         </div>
         <div class="panel">
@@ -104,22 +134,22 @@
         <div class="panel"><div class="panel-header"><div class="panel-title">🚀 Product Hunt</div><span class="panel-tag">Today</span></div><div class="trend-list" id="phList"></div></div>
         <div class="panel"><div class="panel-header"><div class="panel-title">💰 Crypto Trending</div><span class="panel-tag">CoinGecko</span></div><div class="trend-list" id="cryptoList"></div></div>
         <div class="panel"><div class="panel-header"><div class="panel-title">🛒 Hot Products</div><span class="panel-tag">Reddit</span></div><div class="trend-list" id="productsList"></div></div>
-        <div class="panel"><div class="panel-header"><div class="panel-title">&#120143; Twitter/X</div><span class="panel-tag">Trending</span></div><div class="trend-list" id="twitterPanel"></div></div>
         <div class="panel"><div class="panel-header"><div class="panel-title">❓ Top Questions</div><span class="panel-tag">Today</span></div><div class="trend-list" id="questionsList"></div></div>
       </div>
     </section>
 
-    <!-- DIGITAL PRODUCTS -->
+    <section class="view" id="view-saves">
+      <div class="view-header"><h2>📌 My Saves</h2><p class="view-desc">Your personal collection of saved niches, topics, questions and product ideas.</p></div>
+      <div id="savesContainer"><div class="loading-state full">Loading...</div></div>
+    </section>
+
     <section class="view" id="view-digital">
-      <div class="view-header">
-        <h2>Digital Products Intelligence</h2>
-        <p class="view-desc">Find what PDFs, ebooks, templates and guides people are buying right now. Pick your next winning digital product.</p>
-      </div>
+      <div class="view-header"><h2>Digital Products Intelligence</h2><p class="view-desc">Find what PDFs, ebooks, templates and guides people are buying right now.</p></div>
       <div id="digitalContainer"><div class="loading-state full">Analyzing demand signals...</div></div>
     </section>
 
     <section class="view" id="view-topics">
-      <div class="view-header"><h2>Topic Explorer</h2><p class="view-desc">Google + Reddit + Hacker News + Wikipedia + DEV.to + GitHub — all in one place.</p>
+      <div class="view-header"><h2>Topic Explorer</h2><p class="view-desc">Google + Reddit + HN + Wikipedia + DEV.to + GitHub in one place.</p>
         <div class="filter-row">
           <select id="topicCategory" onchange="State._loaded['topics']=false;loadTopics()"><option value="all">All Categories</option><option value="technology">Technology</option><option value="health">Health</option><option value="finance">Finance</option><option value="entertainment">Entertainment</option><option value="food">Food</option><option value="travel">Travel</option><option value="lifestyle">Lifestyle</option></select>
           <select id="topicSource" onchange="State._loaded['topics']=false;loadTopics()"><option value="all">All Sources</option><option value="google">Google Trends</option><option value="reddit">Reddit</option><option value="hn">Hacker News</option><option value="wikipedia">Wikipedia</option><option value="devto">DEV.to</option><option value="github">GitHub</option></select>
@@ -128,18 +158,13 @@
       <div class="topics-grid" id="topicsGrid"><div class="loading-state full">Loading...</div></div>
     </section>
 
-    <section class="view" id="view-products">
-      <div class="view-header"><h2>Product Demand Intelligence</h2><p class="view-desc">What people are actively buying and recommending across Reddit and Product Hunt.</p></div>
-      <div id="productsGrid"><div class="loading-state full">Loading...</div></div>
-    </section>
-
+    <section class="view" id="view-products"><div class="view-header"><h2>Product Demand Intelligence</h2><p class="view-desc">What people are actively buying across Reddit and Product Hunt.</p></div><div id="productsGrid"><div class="loading-state full">Loading...</div></div></section>
     <section class="view" id="view-questions">
-      <div class="view-header"><h2>What People Are Asking</h2><p class="view-desc">Real questions from Reddit, Hacker News, and Stack Overflow — sorted by engagement.</p>
+      <div class="view-header"><h2>What People Are Asking</h2><p class="view-desc">Real questions from Reddit, HN, and Stack Overflow.</p>
         <div class="filter-row"><select id="intentFilter" onchange="State._loaded['questions']=false;loadQuestions()"><option value="all">All Intents</option><option value="how">How-to</option><option value="what">Informational</option><option value="best">Best-of</option><option value="buy">Purchase Intent</option><option value="why">Conceptual</option></select></div>
       </div>
       <div class="questions-container" id="questionsContainer"><div class="loading-state full">Loading...</div></div>
     </section>
-
     <section class="view" id="view-youtube"><div class="view-header"><h2>YouTube Trends</h2><p class="view-desc">Trending videos across 6 categories.</p></div><div id="youtubeContainer"><div class="loading-state full">Loading...</div></div></section>
     <section class="view" id="view-news"><div class="view-header"><h2>News & Headlines</h2><p class="view-desc">Hacker News + top headlines updated live.</p></div><div id="newsContainer"><div class="loading-state full">Loading...</div></div></section>
     <section class="view" id="view-github"><div class="view-header"><h2>GitHub Trending</h2><p class="view-desc">What developers are building right now.</p></div><div id="githubContainer"><div class="loading-state full">Loading...</div></div></section>
@@ -147,13 +172,41 @@
     <section class="view" id="view-stackoverflow"><div class="view-header"><h2>Stack Overflow</h2><p class="view-desc">What developers are stuck on right now.</p></div><div id="soContainer"><div class="loading-state full">Loading...</div></div></section>
     <section class="view" id="view-crypto"><div class="view-header"><h2>Crypto Intelligence</h2><p class="view-desc">Live prices and trending coins from CoinGecko.</p></div><div id="cryptoContainer"><div class="loading-state full">Loading...</div></div></section>
     <section class="view" id="view-jobs"><div class="view-header"><h2>Remote Jobs</h2><p class="view-desc">Latest remote opportunities from Remotive.</p></div><div id="jobsContainer"><div class="loading-state full">Loading...</div></div></section>
-    <section class="view" id="view-books"><div class="view-header"><h2>Trending Books</h2><p class="view-desc">Most-read books today + Reddit book discussions.</p></div><div id="booksContainer"><div class="loading-state full">Loading...</div></div></section>
+    <section class="view" id="view-books"><div class="view-header"><h2>Trending Books</h2><p class="view-desc">Most-read books today + Reddit discussions.</p></div><div id="booksContainer"><div class="loading-state full">Loading...</div></div></section>
     <section class="view" id="view-alerts"><div class="view-header"><h2>Spike Alerts</h2><p class="view-desc">Sudden spikes across Google, HN and CoinGecko.</p></div><div class="alerts-list" id="alertsList"><div class="loading-state full">Scanning...</div></div></section>
-
   </div>
 </main>
 
-<!-- Hidden settings inputs for API keys (not visible to users) -->
+<!-- AUTH MODAL -->
+<div class="modal-overlay" id="authModal">
+  <div class="modal auth-modal">
+    <div class="modal-header">
+      <h3 id="authModalTitle">Welcome back</h3>
+      <button class="modal-close" onclick="Auth.hideAuthModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="auth-error" id="authError"></div>
+
+      <!-- LOGIN -->
+      <form id="loginForm" onsubmit="Auth.handleLogin(event)" style="display:flex;flex-direction:column;gap:12px">
+        <div class="api-group"><label>Email</label><input type="email" id="loginEmail" placeholder="your@email.com" required/></div>
+        <div class="api-group"><label>Password</label><input type="password" id="loginPassword" placeholder="Your password" required/></div>
+        <button type="submit" class="save-btn auth-submit" data-label="Log in">Log in</button>
+      </form>
+
+      <!-- REGISTER -->
+      <form id="registerForm" onsubmit="Auth.handleRegister(event)" style="display:none;flex-direction:column;gap:12px">
+        <div class="api-group"><label>Your name</label><input type="text" id="registerName" placeholder="Your name"/></div>
+        <div class="api-group"><label>Email</label><input type="email" id="registerEmail" placeholder="your@email.com" required/></div>
+        <div class="api-group"><label>Password</label><input type="password" id="registerPassword" placeholder="At least 6 characters" required/></div>
+        <button type="submit" class="save-btn auth-submit" data-label="Create free account">Create free account</button>
+      </form>
+
+      <p id="authSwitchText" class="auth-switch">Don't have an account? <a href="#" onclick="Auth.switchAuthMode('register');return false">Sign up free</a></p>
+    </div>
+  </div>
+</div>
+
 <input type="hidden" id="ytApiKey"/>
 <input type="hidden" id="newsApiKey"/>
 
@@ -163,6 +216,7 @@
 <script src="js/yt-helper.js"></script>
 <script src="js/yt-loader.js"></script>
 <script src="js/charts.js"></script>
+<script src="js/auth.js"></script>
 <script src="js/app.js"></script>
 <script src="js/patch.js"></script>
 </body>
