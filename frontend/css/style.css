@@ -201,6 +201,10 @@ input:focus,select:focus{border-color:var(--accent)}
 .yt-thumb-wrap { position:relative; width:100%; height:160px; background:var(--bg3); overflow:hidden; }
 .yt-thumb { width:100%; height:160px; object-fit:cover; display:block; }
 .yt-thumb-ph { width:100%; height:160px; display:flex; align-items:center; justify-content:center; font-size:36px; background:var(--bg3); color:var(--text3); }
+.yt-title-thumb{position:relative;flex-direction:column;align-items:flex-start;justify-content:flex-end;padding:14px;background:linear-gradient(135deg,#14141d 0%,#202032 55%,#121217 100%);overflow:hidden}
+.yt-title-thumb::before{content:'';position:absolute;inset:0;background:radial-gradient(circle at 18% 18%,rgba(255,77,143,.28),transparent 32%),radial-gradient(circle at 86% 16%,rgba(77,159,255,.22),transparent 30%),linear-gradient(0deg,rgba(0,0,0,.38),transparent 62%)}
+.yt-title-thumb-play{position:relative;z-index:1;width:34px;height:24px;border-radius:7px;background:#ff0033;color:#fff;font-size:13px;display:flex;align-items:center;justify-content:center;margin-bottom:10px}
+.yt-title-thumb-text{position:relative;z-index:1;color:var(--text);font-size:13px;font-weight:700;line-height:1.25;max-width:92%;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 .yt-body { padding:12px; }
 .yt-title{font-size:13px;font-weight:600;line-height:1.4;margin-bottom:5px}
 .yt-channel{font-size:11px;color:var(--text2);margin-bottom:8px}

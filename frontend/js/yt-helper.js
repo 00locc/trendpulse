@@ -1,9 +1,10 @@
 // YouTube render helper — called from loadYouTube
 function renderYouTubeCard(v) {
-  const thumb = v.thumbnail || thumbnailFromYouTubeUrl(v.url) || '';
+  const isSearchResult = String(v.url || '').includes('/results?');
+  const thumb = isSearchResult ? '' : (v.thumbnail || thumbnailFromYouTubeUrl(v.url) || '');
   const thumbSection = thumb
     ? `<div class="yt-thumb-wrap"><img src="${escHtml(thumb)}" class="yt-thumb" loading="lazy" alt="" onerror="this.parentElement.innerHTML='<div class=yt-thumb-ph>&#9654;</div>'"></div>`
-    : `<div class="yt-thumb-ph">&#9654;</div>`;
+    : `<div class="yt-thumb-ph yt-title-thumb"><div class="yt-title-thumb-play">&#9654;</div><div class="yt-title-thumb-text">${escHtml(v.title || 'YouTube trend')}</div></div>`;
   const stats = [
     v.views    ? `<span>&#128065; ${formatNum(v.views)}</span>`   : '',
     v.likes    ? `<span>&#10084; ${formatNum(v.likes)}</span>`    : '',

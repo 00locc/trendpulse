@@ -170,6 +170,8 @@ const Auth = (() => {
     try {
       await addSave(item.type, item.title, item.url, item.extra, item.notes);
       btn.classList.add('saved');
+      btn.classList.remove('saving');
+      btn.disabled = false;
       btn.title = 'Saved';
       btn.setAttribute('aria-label', `Saved ${btn.dataset.title || 'item'}`);
     } catch(e) {
