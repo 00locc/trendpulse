@@ -30,6 +30,7 @@ const Auth = (() => {
       localStorage.removeItem('tp_token');
     }
     updateNav(false);
+    handleAuthQueryParams();
   }
 
   // ── AUTH CALLS ────────────────────────────────────────────
@@ -68,7 +69,11 @@ const Auth = (() => {
     currentUser = null;
     localStorage.removeItem('tp_token');
     updateNav(false);
-    showToast('Logged out successfully');
+    window.location.href = '/';
+  }
+
+  function loginWithGoogle() {
+    window.location.href = `${API_BASE}/auth/google`;
   }
 
   function getUser()  { return currentUser; }
@@ -188,6 +193,30 @@ const Auth = (() => {
     if (!modal) return;
     modal.classList.add('open');
     switchAuthMode(mode);
+  }
+
+  function handleAuthQueryParams() {
+    const params = new URLSearchParams(window.location.search);
+    const mode = params.get('auth');
+    const err = params.get('auth_error');
+    if (mode === 'login' || mode === 'register') {
+      showAuthModal(mode);
+    }
+    if (err) {
+      const messages = {
+        google_not_configured: 'Google login is not configured yet.',
+        google_cancelled: 'Google login was cancelled.',
+        google_failed: 'Google login failed. Please try again.',
+        google_missing_code: 'Google login did not return a code.',
+        google_invalid_state: 'Google login expired. Please try again.',
+        google_user_failed: 'Could not create or load your Google account.',
+        db_unavailable: 'Database unavailable. Please try again soon.',
+      };
+      setAuthError(messages[err] || 'Login failed. Please try again.');
+    }
+    if (mode || err) {
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
   }
 
   function hideAuthModal() {
@@ -346,6 +375,7 @@ const Auth = (() => {
 
   return {
     init, login, register, logout,
+    loginWithGoogle,
     getUser, getToken, isLoggedIn,
     getSaves, addSave, deleteSave, deleteSaveItem,
     saveButton, handleSaveButton,

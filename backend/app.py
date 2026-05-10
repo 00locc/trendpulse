@@ -3,7 +3,7 @@
 # Flask + Supabase PostgreSQL + JWT Auth
 # ============================================================
 
-from flask import Flask, jsonify, request, send_from_directory
+from flask import Flask, jsonify, request, send_from_directory, redirect
 from flask_cors import CORS
 import os
 import logging
@@ -11,6 +11,9 @@ import jwt
 import bcrypt
 import psycopg2
 import psycopg2.extras
+import requests
+import secrets
+from urllib.parse import urlencode
 from datetime import datetime, timedelta
 from functools import wraps
 
@@ -23,6 +26,8 @@ CORS(app, supports_credentials=True)
 # ── ENV VARS ──────────────────────────────────────────────────
 DATABASE_URL = os.environ.get('DATABASE_URL', '')
 JWT_SECRET   = os.environ.get('JWT_SECRET', 'fallback-secret-change-this')
+GOOGLE_CLIENT_ID = os.environ.get('GOOGLE_CLIENT_ID', '')
+GOOGLE_CLIENT_SECRET = os.environ.get('GOOGLE_CLIENT_SECRET', '')
 
 # ── DATABASE ──────────────────────────────────────────────────
 def get_db():
@@ -87,6 +92,21 @@ def create_token(user_id, email):
         'exp': datetime.utcnow() + timedelta(days=30)
     }
     return jwt.encode(payload, JWT_SECRET, algorithm='HS256')
+
+def create_oauth_state():
+    payload = {
+        'nonce': secrets.token_urlsafe(16),
+        'exp': datetime.utcnow() + timedelta(minutes=10)
+    }
+    return jwt.encode(payload, JWT_SECRET, algorithm='HS256')
+
+def get_base_url():
+    configured = os.environ.get('PUBLIC_BASE_URL', '').rstrip('/')
+    if configured:
+        return configured
+    forwarded_proto = request.headers.get('X-Forwarded-Proto')
+    scheme = forwarded_proto or request.scheme
+    return f'{scheme}://{request.host}'
 
 def token_required(f):
     @wraps(f)
@@ -229,6 +249,104 @@ def get_me():
         return jsonify({'error': str(e)}), 500
 
 # ── SAVES ROUTES ──────────────────────────────────────────────
+@app.route('/api/auth/google', methods=['GET'])
+def google_login():
+    if not GOOGLE_CLIENT_ID or not GOOGLE_CLIENT_SECRET:
+        return redirect('/dashboard?auth=login&auth_error=google_not_configured')
+
+    redirect_uri = f'{get_base_url()}/api/auth/google/callback'
+    params = {
+        'client_id': GOOGLE_CLIENT_ID,
+        'redirect_uri': redirect_uri,
+        'response_type': 'code',
+        'scope': 'openid email profile',
+        'access_type': 'online',
+        'prompt': 'select_account',
+        'state': create_oauth_state(),
+    }
+    return redirect('https://accounts.google.com/o/oauth2/v2/auth?' + urlencode(params))
+
+
+@app.route('/api/auth/google/callback', methods=['GET'])
+def google_callback():
+    if request.args.get('error'):
+        return redirect('/dashboard?auth=login&auth_error=google_cancelled')
+
+    code = request.args.get('code')
+    state = request.args.get('state')
+    if not code or not state:
+        return redirect('/dashboard?auth=login&auth_error=google_missing_code')
+
+    try:
+        jwt.decode(state, JWT_SECRET, algorithms=['HS256'])
+    except Exception:
+        return redirect('/dashboard?auth=login&auth_error=google_invalid_state')
+
+    try:
+        token_res = requests.post(
+            'https://oauth2.googleapis.com/token',
+            data={
+                'code': code,
+                'client_id': GOOGLE_CLIENT_ID,
+                'client_secret': GOOGLE_CLIENT_SECRET,
+                'redirect_uri': f'{get_base_url()}/api/auth/google/callback',
+                'grant_type': 'authorization_code',
+            },
+            timeout=10,
+        )
+        token_res.raise_for_status()
+        access_token = token_res.json().get('access_token')
+        user_res = requests.get(
+            'https://www.googleapis.com/oauth2/v3/userinfo',
+            headers={'Authorization': f'Bearer {access_token}'},
+            timeout=10,
+        )
+        user_res.raise_for_status()
+        profile = user_res.json()
+        email = (profile.get('email') or '').strip().lower()
+        name = (profile.get('name') or email.split('@')[0]).strip()
+        google_sub = profile.get('sub') or ''
+        if not email:
+            raise ValueError('Google account did not return an email')
+    except Exception as e:
+        logging.error(f'Google OAuth error: {e}')
+        return redirect('/dashboard?auth=login&auth_error=google_failed')
+
+    conn = get_db()
+    if not conn:
+        return redirect('/dashboard?auth=login&auth_error=db_unavailable')
+    try:
+        cur = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+        cur.execute('SELECT id, email, name FROM users WHERE email = %s', (email,))
+        user = cur.fetchone()
+        if not user:
+            pw_hash = bcrypt.hashpw(f'google:{google_sub}:{secrets.token_urlsafe(24)}'.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
+            cur.execute(
+                'INSERT INTO users (email, password_hash, name) VALUES (%s, %s, %s) RETURNING id, email, name',
+                (email, pw_hash, name)
+            )
+            user = cur.fetchone()
+            conn.commit()
+        cur.close()
+        conn.close()
+        token = create_token(user['id'], user['email'])
+        return f"""
+        <!doctype html>
+        <html><head><title>Signing in...</title></head>
+        <body>
+          <script>
+            localStorage.setItem('tp_token', {token!r});
+            window.location.href = '/dashboard';
+          </script>
+          Signing you in...
+        </body></html>
+        """
+    except Exception as e:
+        logging.error(f'Google user upsert error: {e}')
+        conn.close()
+        return redirect('/dashboard?auth=login&auth_error=google_user_failed')
+
+
 @app.route('/api/saves', methods=['GET'])
 @token_required
 def get_saves():

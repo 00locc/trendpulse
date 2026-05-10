@@ -107,6 +107,19 @@
       font-family: var(--fb);
     }
     .btn-primary:hover { background: var(--accent2); transform: translateY(-1px); }
+    .btn-google {
+      padding: 9px 20px;
+      background: #fff;
+      color: #1f1f1f;
+      border: 1px solid rgba(255,255,255,0.2);
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 700;
+      text-decoration: none;
+      transition: all .2s;
+      font-family: var(--fb);
+    }
+    .btn-google:hover { transform: translateY(-1px); box-shadow: 0 12px 30px rgba(0,0,0,.22); }
 
     /* ── HERO ── */
     .hero {
@@ -632,7 +645,8 @@
   </div>
   <div class="nav-cta">
     <a href="#how" class="btn-ghost">How it works</a>
-    <a href="dashboard.html" class="btn-primary">Launch App →</a>
+    <a href="/dashboard?auth=login" class="btn-ghost">Log in</a>
+    <a href="/dashboard?auth=register" class="btn-primary">Sign up free</a>
   </div>
 </nav>
 
@@ -651,11 +665,11 @@
       Free trend intelligence for <strong>digital product creators</strong>. Discover which ebooks, PDFs and templates are in demand using live signals from Google, Reddit, Amazon and Etsy.
     </p>
     <div class="hero-actions">
-      <a href="dashboard.html" class="btn-hero">
+      <a href="/dashboard?auth=register" class="btn-hero">
         <svg width="16" height="16" viewBox="0 0 20 20" fill="none"><polyline points="2,14 7,9 11,13 16,6 19,8" stroke="#000" stroke-width="2" stroke-linecap="round"/></svg>
-        Explore Trends Free
+        Sign Up Free
       </a>
-      <a href="#email" class="btn-hero-ghost">Get Weekly Report →</a>
+      <a href="/api/auth/google" class="btn-hero-ghost">Continue with Google</a>
     </div>
     <div class="hero-proof">
       <div class="proof-item">✓ <span>100% Free</span> — no credit card</div>
@@ -785,7 +799,7 @@
       </a>
     </div>
     <div style="text-align:center;margin-top:40px">
-      <a href="dashboard.html" class="btn-hero">See All 32 Niches →</a>
+      <a href="/dashboard?auth=register" class="btn-hero">See All 32 Niches →</a>
     </div>
   </div>
 </div>
@@ -862,7 +876,7 @@
 <div class="cta-section fade-up">
   <h2 class="cta-title">START FINDING<br><span style="color:var(--accent)">WINNING IDEAS</span><br>TODAY</h2>
   <p class="cta-sub">Free trend intelligence. No signup required. Start discovering what to create right now.</p>
-  <a href="dashboard.html" class="btn-hero">Launch TrendPulse Free →</a>
+  <a href="/dashboard?auth=register" class="btn-hero">Create Account Free →</a>
 </div>
 
 <!-- FOOTER -->
@@ -898,3 +912,4 @@
 </script>
 </body>
 </html>
+
