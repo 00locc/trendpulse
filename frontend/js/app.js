@@ -234,7 +234,11 @@ async function loadDashboard() {
       const questions = API.extractQuestions(redditPosts);
       const topics    = API.clusterTopics(redditPosts);
       const totalSig  = (redditPosts.length + (hnPosts?.length||0) + (wikiPages?.length||0)) * 180;
-      setMetric('m-signals',  formatNum(totalSig),        'm-signals-delta', '↑ Live data loaded',  'up');
+      // Only update signal count if it's higher than what we already show
+      const currentSig = parseInt((document.getElementById('m-signals')?.textContent||'0').replace(/[^0-9]/g,'')) * (document.getElementById('m-signals')?.textContent?.includes('K') ? 1000 : 1);
+      if (totalSig > currentSig) {
+        setMetric('m-signals', formatNum(totalSig), 'm-signals-delta', '↑ Live data loaded', 'up');
+      }
       setMetric('m-topics',   String(topics.length)+'+',  'm-topics-delta',  'Across all platforms', 'up');
       setMetric('m-products', String(products.length)+'+','m-products-delta','In demand right now',  'up');
       setMetric('m-questions',String(questions.length)+'+','m-questions-delta','Being asked today',  'up');
