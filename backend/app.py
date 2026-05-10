@@ -27,7 +27,12 @@ JWT_SECRET   = os.environ.get('JWT_SECRET', 'fallback-secret-change-this')
 # ── DATABASE ──────────────────────────────────────────────────
 def get_db():
     try:
-        conn = psycopg2.connect(DATABASE_URL, sslmode='require')
+        if not DATABASE_URL:
+            logging.error('DATABASE_URL is empty or not set')
+            return None
+        # Fix common URL format issue
+        url = DATABASE_URL.replace('postgres://', 'postgresql://', 1)
+        conn = psycopg2.connect(url, sslmode='require', connect_timeout=10)
         return conn
     except Exception as e:
         logging.error(f'DB connection error: {e}')
@@ -384,7 +389,25 @@ def get_related():
 
 @app.route('/api/health')
 def health():
-    return jsonify({'status': 'ok', 'pytrends': PYTRENDS_OK, 'db': bool(DATABASE_URL)})
+    db_ok = False
+    db_error = ''
+    try:
+        conn = get_db()
+        if conn:
+            conn.close()
+            db_ok = True
+        else:
+            db_error = 'get_db() returned None'
+    except Exception as e:
+        db_error = str(e)
+    return jsonify({
+        'status': 'ok',
+        'pytrends': PYTRENDS_OK,
+        'db': db_ok,
+        'db_error': db_error,
+        'db_url_set': bool(DATABASE_URL),
+        'db_url_prefix': DATABASE_URL[:20] + '...' if DATABASE_URL else 'NOT SET'
+    })
 
 def _demo_trends():
     return { 'labels': ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'], 'datasets': { 'AI tools': [42,51,48,61,72,66,81], 'side hustle': [31,36,32,45,51,47,58], 'meal prep': [18,21,20,27,32,30,36] } }
