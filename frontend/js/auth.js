@@ -11,6 +11,7 @@ const Auth = (() => {
 
   let currentUser = null;
   let authToken   = localStorage.getItem('tp_token') || null;
+  let pendingSave = null;
 
   // ── INIT ──────────────────────────────────────────────────
   async function init() {
@@ -123,15 +124,59 @@ const Auth = (() => {
     try {
       const saves = await getSaves();
       const savedTitles = new Set(saves.map(s => s.title.toLowerCase()));
-      document.querySelectorAll('.save-btn').forEach(btn => {
+      document.querySelectorAll('.bookmark-btn').forEach(btn => {
         const title = btn.dataset.title?.toLowerCase();
         if (title && savedTitles.has(title)) {
           btn.classList.add('saved');
-          btn.textContent = '★';
+          btn.innerHTML = '?';
           btn.title = 'Saved';
         }
       });
     } catch(e) {}
+  }
+
+  async function processPendingSave() {
+    if (!pendingSave || !authToken) return;
+    const item = pendingSave;
+    pendingSave = null;
+    try {
+      await addSave(item.type, item.title, item.url, item.extra, item.notes);
+      loadSaveStates();
+    } catch(e) {}
+  }
+
+  function saveButton({ type = 'topic', title = '', url = '', extra = {}, notes = '' }) {
+    const payload = encodeURIComponent(JSON.stringify({ type, title, url, extra, notes }));
+    return `<button class="bookmark-btn" data-title="${escHtml(title)}" data-save="${payload}" onclick="event.stopPropagation();Auth.handleSaveButton(this)" title="Save to My Saves" aria-label="Save ${escHtml(title)}">☆</button>`;
+  }
+
+  async function handleSaveButton(btn) {
+    let item;
+    try {
+      item = JSON.parse(decodeURIComponent(btn.dataset.save || '%7B%7D'));
+    } catch(e) {
+      showToast('Could not read this item');
+      return;
+    }
+    if (!isLoggedIn()) {
+      pendingSave = item;
+      showAuthModal('login');
+      showToast('Log in to save this');
+      return;
+    }
+    const original = btn.innerHTML;
+    btn.disabled = true;
+    btn.innerHTML = 'Saving...';
+    try {
+      await addSave(item.type, item.title, item.url, item.extra, item.notes);
+      btn.classList.add('saved');
+      btn.innerHTML = '★ <span>Saved</span>';
+      btn.title = 'Saved';
+    } catch(e) {
+      btn.disabled = false;
+      btn.innerHTML = original;
+      showToast(e.message || 'Save failed');
+    }
   }
 
   // ── MODAL ─────────────────────────────────────────────────
@@ -195,6 +240,7 @@ const Auth = (() => {
     try {
       await login(email, password);
       hideAuthModal();
+      await processPendingSave();
       showToast(`Welcome back! 👋`);
     } catch(err) {
       setAuthError(err.message);
@@ -212,6 +258,7 @@ const Auth = (() => {
     try {
       await register(email, password, name);
       hideAuthModal();
+      await processPendingSave();
       showToast(`Account created! Welcome to TrendPulse 🎉`);
     } catch(err) {
       setAuthError(err.message);
@@ -298,6 +345,7 @@ const Auth = (() => {
     init, login, register, logout,
     getUser, getToken, isLoggedIn,
     getSaves, addSave, deleteSave, deleteSaveItem,
+    saveButton, handleSaveButton,
     showAuthModal, hideAuthModal, switchAuthMode,
     handleLogin, handleRegister,
     showSavesView, showToast, loadSaveStates,
@@ -307,3 +355,6 @@ const Auth = (() => {
 
 // Init on load
 document.addEventListener('DOMContentLoaded', () => Auth.init());
+
+
+

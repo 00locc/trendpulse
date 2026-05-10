@@ -33,7 +33,7 @@ function switchView(view) {
     questions:'What People Ask', youtube:'YouTube Trends', news:'News & Headlines',
     github:'GitHub Trending', devto:'Developer Articles', crypto:'Crypto Intelligence',
     books:'Trending Books', jobs:'Remote Jobs', stackoverflow:'Stack Overflow', alerts:'Spike Alerts',
-    saved:'Saved Library',
+    saves:'My Saves',
   };
   document.getElementById('pageTitle').textContent = titles[view] || view;
   State.currentView = view;
@@ -42,7 +42,7 @@ function switchView(view) {
     questions:loadQuestions, youtube:loadYouTube, news:loadNews,
     github:loadGitHub, devto:loadDevTo, crypto:loadCrypto,
     books:loadBooks, jobs:loadJobs, stackoverflow:loadStackOverflow, alerts:loadAlerts,
-    saved:() => Auth.loadSaved(),
+    saves:() => Auth.showSavesView(),
   };
   if (loaders[view] && !State._loaded[view]) loaders[view]();
 }
@@ -86,6 +86,14 @@ function buildLink(item) {
   if (item.url) return item.url;
   const q = item.term || item.text || item.name || '';
   return q ? `https://www.google.com/search?q=${encodeURIComponent(q)}` : '#';
+}
+function renderBookmark(item) {
+  try {
+    return typeof Auth !== 'undefined' && Auth.saveButton ? Auth.saveButton(item) : '';
+  } catch(e) {
+    console.warn('Bookmark button skipped:', e);
+    return '';
+  }
 }
 
 function renderPulseWidget(items) {
@@ -266,10 +274,12 @@ function renderDashList(elId, items, type) {
     else if (type==='crypto')  { name=`${item.name} (${item.symbol||''})`; url=item.url||'#'; sub=`CoinGecko · MCap #${item.rank||'?'}`; }
     else if (type==='product') { name=capitalize(item.name||''); url=item.url||`https://www.reddit.com/search/?q=${encodeURIComponent(item.name||'')}&sort=hot&t=week`; sub='Reddit demand'; vol=String(item.score); }
     else if (type==='question'){ name=(item.text||'').substring(0,70); url=item.url||buildLink(item); sub=`${item.subreddit||item.source||''} · ${formatNum(item.score)} pts`; }
+    const saveType = type === 'question' ? 'question' : type === 'product' ? 'product' : 'topic';
     return `<div class="trend-item trend-item-link" onclick="openLink('${escAttr(url)}')" title="${escHtml(name)}">
       <div class="trend-rank">#${i+1}</div>
       <div class="trend-name">${escHtml(name.substring(0,55))}${name.length>55?'...':''}<small>${escHtml(sub)}</small></div>
       ${vol?`<div class="trend-vol">${vol}</div>`:''}
+      ${renderBookmark({ type:saveType, title:name, url, extra:{ source:type, meta:sub, score:item.score||item.volume||item.views||item.votes||'' }, notes:sub })}
     </div>`;
   }).join('');
 }
@@ -391,7 +401,7 @@ function renderTopicCard(t) {
     <div class="topic-volume">${t.volume||''}</div>
     ${t.meta?`<div class="topic-meta">${escHtml(t.meta)}</div>`:''}
     ${t.delta?`<div class="trend-delta ${t.delta.startsWith('+')?'up':'down'}">${t.delta}</div>`:''}
-    ${Auth.button({ title:t.name||'Untitled topic', type:'topic', source:(t.sources||[]).join(', '), url, meta:t.meta||t.volume||'', notes:t.delta||'' })}
+    ${renderBookmark({ title:t.name||'Untitled topic', type:'topic', url, extra:{ source:(t.sources||[]).join(', '), meta:t.meta||t.volume||'' }, notes:t.delta||'' })}
   </div>`;
 }
 
@@ -417,8 +427,17 @@ function renderProductsGrid(products, ph) {
   const colors=['#00f5a0','#4d9fff','#ff7a2f','#ffd60a','#ff4d8f'];
   const maxS=Math.max(...products.map(p=>p.score),1);
   let html='';
-  if (ph?.length) { html+=`<div class="section-header">🚀 Product Hunt — Latest Launches</div><div class="ph-grid">${ph.map(p=>`<div class="ph-card" onclick="openLink('${escAttr(p.url||'#')}')"><div class="ph-title">${escHtml(p.title||'')}</div><div class="ph-desc">${escHtml((p.description||'').substring(0,100))}</div>${p.votes?`<div class="ph-votes">▲ ${p.votes}</div>`:''}</div>`).join('')}</div>`; }
-  html+=`<div class="section-header">🛒 Product Demand Intelligence</div><div class="products-inner">${products.slice(0,48).map((p,i)=>{ const pct=Math.round((p.score/maxS)*100); const color=colors[i%5]; const rUrl=p.url||`https://www.reddit.com/search/?q=${encodeURIComponent(p.name)}&sort=hot&t=week`; const aUrl=`https://www.amazon.com/s?k=${encodeURIComponent(p.name)}`; const gUrl=`https://www.google.com/search?q=${encodeURIComponent(capitalize(p.name)+' review 2025')}`; return `<div class="product-card"><div class="product-rank" style="color:${color}">#${i+1}</div><div class="product-name">${escHtml(capitalize(p.name))}</div><div class="product-desc">High demand signal</div><div class="product-stats"><div class="pstat"><div class="pstat-val" style="color:${color}">${p.score}</div><div class="pstat-lab">Demand</div></div><div class="pstat"><div class="pstat-val" style="color:${color}">${pct}%</div><div class="pstat-lab">Relative</div></div><div class="pstat"><div class="pstat-val" style="color:${color}">${i<5?'🔥':i<15?'📈':'💬'}</div><div class="pstat-lab">Signal</div></div></div><div class="product-trend-bar"><div class="product-trend-fill" style="width:${pct}%;background:${color}"></div></div><div class="product-links"><button class="product-link-btn" onclick="event.stopPropagation();openLink('${escAttr(rUrl)}')">Reddit ↗</button><button class="product-link-btn" onclick="event.stopPropagation();openLink('${escAttr(gUrl)}')">Reviews ↗</button><button class="product-link-btn" onclick="event.stopPropagation();openLink('${escAttr(aUrl)}')">Amazon ↗</button></div></div>`; }).join('')}</div>`;
+  if (ph?.length) {
+    html += `<div class="section-header">Product Hunt - Latest Launches</div><div class="ph-grid">${ph.map(p=>`<div class="ph-card" onclick="openLink('${escAttr(p.url||'#')}')"><div class="ph-title">${escHtml(p.title||'')}</div><div class="ph-desc">${escHtml((p.description||'').substring(0,100))}</div>${p.votes?`<div class="ph-votes">▲ ${p.votes}</div>`:''}${renderBookmark({ type:'product', title:p.title||'Untitled launch', url:p.url||'#', extra:{ source:'Product Hunt', votes:p.votes||0 }, notes:p.description||'' })}</div>`).join('')}</div>`;
+  }
+  html += `<div class="section-header">Product Demand Intelligence</div><div class="products-inner">${products.slice(0,48).map((p,i)=>{
+    const pct=Math.round((p.score/maxS)*100);
+    const color=colors[i%5];
+    const rUrl=p.url||`https://www.reddit.com/search/?q=${encodeURIComponent(p.name)}&sort=hot&t=week`;
+    const aUrl=`https://www.amazon.com/s?k=${encodeURIComponent(p.name)}`;
+    const gUrl=`https://www.google.com/search?q=${encodeURIComponent(capitalize(p.name)+' review 2025')}`;
+    return `<div class="product-card"><div class="product-rank" style="color:${color}">#${i+1}</div><div class="product-name">${escHtml(capitalize(p.name))}</div><div class="product-desc">High demand signal</div><div class="product-stats"><div class="pstat"><div class="pstat-val" style="color:${color}">${p.score}</div><div class="pstat-lab">Demand</div></div><div class="pstat"><div class="pstat-val" style="color:${color}">${pct}%</div><div class="pstat-lab">Relative</div></div><div class="pstat"><div class="pstat-val" style="color:${color}">${i<5?'Hot':i<15?'Up':'Talk'}</div><div class="pstat-lab">Signal</div></div></div><div class="product-trend-bar"><div class="product-trend-fill" style="width:${pct}%;background:${color}"></div></div><div class="product-links"><button class="product-link-btn" onclick="event.stopPropagation();openLink('${escAttr(rUrl)}')">Reddit</button><button class="product-link-btn" onclick="event.stopPropagation();openLink('${escAttr(gUrl)}')">Reviews</button><button class="product-link-btn" onclick="event.stopPropagation();openLink('${escAttr(aUrl)}')">Amazon</button></div>${renderBookmark({ type:'product', title:capitalize(p.name||'Untitled product'), url:rUrl, extra:{ source:p.source||'TrendPulse', demand:p.score, relative:pct }, notes:'High demand signal' })}</div>`;
+  }).join('')}</div>`;
   wrap.innerHTML=html;
 }
 
@@ -440,7 +459,7 @@ async function loadQuestions() {
     el.innerHTML=`<div class="results-count">${display.length} questions</div>`+display.slice(0,80).map(q=>{
       const rUrl=q.url||`https://www.reddit.com/search/?q=${encodeURIComponent(q.text)}&sort=hot&t=week`;
       const gUrl=`https://www.google.com/search?q=${encodeURIComponent(q.text)}`;
-      return `<div class="question-card"><div class="q-top"><div class="q-text">${escHtml(q.text)}</div><span class="q-intent intent-${q.intent}">${intentLabels[q.intent]||q.intent}</span></div><div class="q-meta"><span>Via: <strong>${escHtml(q.subreddit||q.source||'')}</strong></span><span>Score: <strong>${formatNum(q.score)}</strong></span></div><div class="q-actions"><button class="q-btn q-btn-reddit" onclick="openLink('${escAttr(rUrl)}')">Read discussion ↗</button><button class="q-btn q-btn-google" onclick="openLink('${escAttr(gUrl)}')">Search Google ↗</button>${Auth.button({ title:q.text, type:'question', source:q.subreddit||q.source||'TrendPulse', url:rUrl, meta:`Score ${formatNum(q.score)}`, notes:intentLabels[q.intent]||q.intent })}</div></div>`;
+      return `<div class="question-card"><div class="q-top"><div class="q-text">${escHtml(q.text)}</div><span class="q-intent intent-${q.intent}">${intentLabels[q.intent]||q.intent}</span></div><div class="q-meta"><span>Via: <strong>${escHtml(q.subreddit||q.source||'')}</strong></span><span>Score: <strong>${formatNum(q.score)}</strong></span></div><div class="q-actions"><button class="q-btn q-btn-reddit" onclick="openLink('${escAttr(rUrl)}')">Read discussion ↗</button><button class="q-btn q-btn-google" onclick="openLink('${escAttr(gUrl)}')">Search Google ↗</button>${renderBookmark({ title:q.text, type:'question', url:rUrl, extra:{ source:q.subreddit||q.source||'TrendPulse', score:formatNum(q.score) }, notes:intentLabels[q.intent]||q.intent })}</div></div>`;
     }).join('');
   } catch(e) { el.innerHTML='<div class="loading-state full">Error loading questions</div>'; }
 }
@@ -477,7 +496,9 @@ async function loadGitHub() {
   const el=document.getElementById('githubContainer');
   if(!el) return;
   el.innerHTML='<div class="loading-state full">Loading GitHub trending...</div>';
-  const [daily,weekly]=await Promise.all([API.getGitHubTrending('','daily').catch(()=>[]),API.getGitHubTrending('','weekly').catch(()=>[])]);
+  const [dailyRaw,weeklyRaw]=await Promise.all([API.getGitHubTrending('','daily').catch(()=>[]),API.getGitHubTrending('','weekly').catch(()=>[])]);
+  const daily=Array.isArray(dailyRaw)?dailyRaw:[];
+  const weekly=Array.isArray(weeklyRaw)?weeklyRaw:[];
   const seen=new Set(); const all=[...daily,...weekly].filter(r=>{ if(seen.has(r.url)) return false; seen.add(r.url); return true; });
   const lc={'Python':'#3572A5','JavaScript':'#f1e05a','TypeScript':'#2b7489','Rust':'#dea584','Go':'#00ADD8','Java':'#b07219','Unknown':'#8888a0'};
   el.innerHTML=all.length?`<div class="results-count">${all.length} trending repositories</div><div class="gh-grid">${all.slice(0,60).map(r=>`<div class="gh-card" onclick="openLink('${escAttr(r.url)}')"><div class="gh-name">${escHtml(r.title)}</div><div class="gh-desc">${escHtml((r.description||'No description').substring(0,100))}</div><div class="gh-stats"><span>⭐ ${formatNum(r.stars)}</span>${r.starsToday?`<span class="gh-new">+${r.starsToday} today</span>`:''}<span>🍴 ${formatNum(r.forks)}</span><span class="gh-lang" style="color:${lc[r.language]||'#8888a0'}">● ${r.language}</span></div></div>`).join('')}</div>`:'<div class="loading-state full">GitHub Trending unavailable — try refreshing</div>';
@@ -490,8 +511,10 @@ async function loadDevTo() {
   if(!el) return;
   el.innerHTML='<div class="loading-state full">Loading DEV.to articles...</div>';
   const tags=['javascript','python','ai','webdev','career','productivity','react','tutorial'];
-  const [general,...tagged]=await Promise.all([API.getDevToArticles('',20).catch(()=>[]),...tags.map(t=>API.getDevToArticles(t,6).catch(()=>[]))]);
-  const seen=new Set(); const all=[...general,...tagged.flat()].filter(a=>{ if(seen.has(a.url)) return false; seen.add(a.url); return true; }).sort((a,b)=>b.reactions-a.reactions);
+  const [generalRaw,...taggedRaw]=await Promise.all([API.getDevToArticles('',20).catch(()=>[]),...tags.map(t=>API.getDevToArticles(t,6).catch(()=>[]))]);
+  const general=Array.isArray(generalRaw)?generalRaw:[];
+  const tagged=taggedRaw.flat().filter(Boolean);
+  const seen=new Set(); const all=[...general,...tagged].filter(a=>{ if(!a?.url||seen.has(a.url)) return false; seen.add(a.url); return true; }).sort((a,b)=>(b.reactions||0)-(a.reactions||0));
   el.innerHTML=all.length?`<div class="results-count">${all.length} developer articles</div><div class="devto-grid">${all.slice(0,60).map(a=>`<div class="devto-card" onclick="openLink('${escAttr(a.url)}')">${a.cover?`<img class="devto-cover" src="${escHtml(a.cover)}" alt="" loading="lazy" onerror="this.style.display='none'">`:'<div style="height:80px;background:var(--bg3);border-radius:var(--rl) var(--rl) 0 0"></div>'}<div class="devto-body"><div class="devto-tags">${(a.tags||[]).slice(0,3).map(t=>`<span class="devto-tag">#${t}</span>`).join('')}</div><div class="devto-title">${escHtml(a.title)}</div><div class="devto-author">by ${escHtml(a.author)} · ${a.readTime}min</div><div class="devto-stats"><span>❤ ${formatNum(a.reactions)}</span><span>💬 ${formatNum(a.comments)}</span></div></div></div>`).join('')}</div>`:'<div class="loading-state full">DEV.to unavailable — try refreshing</div>';
 }
 
@@ -522,7 +545,9 @@ async function loadBooks() {
   const el=document.getElementById('booksContainer');
   if(!el) return;
   el.innerHTML='<div class="loading-state full">Loading books...</div>';
-  const [daily,reddit]=await Promise.all([API.getTrendingBooks().catch(()=>[]),API.getRedditMulti(['books','Fantasy','scifi','history','philosophy'],12).catch(()=>[])]);
+  const [dailyRaw,redditRaw]=await Promise.all([API.getTrendingBooks().catch(()=>[]),API.getRedditMulti(['books','Fantasy','scifi','history','philosophy'],12).catch(()=>[])]);
+  const daily=Array.isArray(dailyRaw)?dailyRaw:[];
+  const reddit=Array.isArray(redditRaw)?redditRaw:[];
   const discussed=reddit.filter(p=>p.title&&/book|novel|read|author|recommend/i.test(p.title));
   let html='';
   if(daily.length){html+=`<div class="section-header">📚 Trending on Open Library</div><div class="books-grid">${daily.map(b=>`<div class="book-card" onclick="openLink('${escAttr(b.url)}')">${b.cover?`<img class="book-cover" src="${escHtml(b.cover)}" alt="" loading="lazy" onerror="this.style.display='none'">`:'<div class="book-cover-ph">📖</div>'}<div class="book-info"><div class="book-title">${escHtml(b.title)}</div><div class="book-author">${escHtml(b.author||'Unknown')}</div><div class="book-meta">${b.year?b.year+' · ':''}${b.rating?'⭐ '+b.rating:''}</div>${b.reads?`<div class="book-reads">${formatNum(b.reads)} want to read</div>`:''}</div></div>`).join('')}</div>`;}
@@ -576,7 +601,7 @@ async function refreshAll() {
   await loadDashboard();
   const v=State.currentView;
   if (v!=='dashboard') {
-    const loaders={digital:loadDigital,topics:loadTopics,products:loadProducts,questions:loadQuestions,youtube:loadYouTube,news:loadNews,github:loadGitHub,devto:loadDevTo,crypto:loadCrypto,books:loadBooks,jobs:loadJobs,stackoverflow:loadStackOverflow,alerts:loadAlerts,saved:() => Auth.loadSaved()};
+    const loaders={digital:loadDigital,topics:loadTopics,products:loadProducts,questions:loadQuestions,youtube:loadYouTube,news:loadNews,github:loadGitHub,devto:loadDevTo,crypto:loadCrypto,books:loadBooks,jobs:loadJobs,stackoverflow:loadStackOverflow,alerts:loadAlerts,saves:() => Auth.showSavesView()};
     if(loaders[v]) loaders[v]();
   }
 }

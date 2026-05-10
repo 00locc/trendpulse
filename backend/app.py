@@ -30,9 +30,12 @@ def get_db():
         if not DATABASE_URL:
             logging.error('DATABASE_URL is empty or not set')
             return None
-        # Fix common URL format issue
         url = DATABASE_URL.replace('postgres://', 'postgresql://', 1)
-        conn = psycopg2.connect(url, sslmode='require', connect_timeout=10)
+        # Try with SSL first, fallback without
+        try:
+            conn = psycopg2.connect(url, sslmode='require', connect_timeout=10)
+        except Exception:
+            conn = psycopg2.connect(url, connect_timeout=10)
         return conn
     except Exception as e:
         logging.error(f'DB connection error: {e}')
