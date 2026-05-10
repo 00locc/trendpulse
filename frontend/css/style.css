@@ -319,11 +319,16 @@ input:focus,select:focus{border-color:var(--accent)}
 .auth-message.info{color:var(--accent)}
 .auth-swap{margin-top:12px;text-align:center;font-size:12px;color:var(--text2)}
 .auth-swap button{border:none;background:none;color:var(--accent);font-weight:600}
-.bookmark-btn{width:24px;height:24px;margin-top:10px;padding:0;border:1px solid rgba(0,245,160,0.25);border-radius:6px;background:rgba(0,245,160,0.08);color:var(--accent);font-size:14px;font-weight:600;align-self:flex-start;display:inline-flex;align-items:center;justify-content:center;line-height:1;transition:all .15s}
+.bookmark-btn{width:24px;height:24px;margin-top:10px;padding:0;border:1px solid rgba(255,255,255,0.12);border-radius:6px;background:rgba(255,255,255,0.03);color:var(--text2);align-self:flex-start;display:inline-flex;align-items:center;justify-content:center;line-height:1;transition:all .15s}
+.bookmark-btn svg{width:14px;height:14px;display:block}
+.bookmark-shape{fill:transparent;stroke:currentColor;stroke-width:1.8;stroke-linejoin:round}
 .save-mini{margin-top:10px;padding:5px 9px;border:1px solid rgba(0,245,160,0.25);border-radius:6px;background:rgba(0,245,160,0.08);color:var(--accent);font-size:10px;font-weight:600;align-self:flex-start;display:inline-flex;align-items:center;gap:4px;line-height:1.2;transition:all .15s}
-.bookmark-btn:hover,.save-mini:hover{background:rgba(0,245,160,0.14);border-color:var(--accent);transform:translateY(-1px)}
-.bookmark-btn.saved{background:var(--accent);border-color:var(--accent);color:#000}
-.bookmark-btn:disabled{opacity:.75;cursor:default;transform:none}
+.bookmark-btn:hover{background:rgba(0,245,160,0.08);border-color:rgba(0,245,160,0.4);color:var(--accent);transform:translateY(-1px)}
+.save-mini:hover{background:rgba(0,245,160,0.14);border-color:var(--accent);transform:translateY(-1px)}
+.bookmark-btn.saved{background:rgba(0,245,160,0.12);border-color:rgba(0,245,160,0.45);color:var(--accent)}
+.bookmark-btn.saved .bookmark-shape{fill:currentColor}
+.bookmark-btn.saving{opacity:.65}
+.bookmark-btn:disabled{cursor:default;transform:none}
 .q-actions .save-mini{margin-top:0;color:var(--accent);border-color:rgba(0,245,160,0.25)}
 .q-actions .bookmark-btn{margin-top:0}
 .save-mini:disabled{opacity:.7;cursor:default}

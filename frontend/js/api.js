@@ -738,7 +738,7 @@ const API = (() => {
   }
 
   function getDemoYouTube() {
-    return [
+    const demo = [
       {source:'YouTube',title:'I Made $10K Selling Digital Products on Etsy',channel:'DigitalIncome',views:2100000,likes:89000,url:'https://youtube.com/results?search_query=sell+digital+products',thumbnail:''},
       {source:'YouTube',title:'How to Make Passive Income with Notion Templates',channel:'ProductivityPro',views:1400000,likes:62000,url:'https://youtube.com/results?search_query=notion+template+passive+income',thumbnail:''},
       {source:'YouTube',title:'Amazon KDP: $5K/Month Passive Income Guide',channel:'KDPInsider',views:980000,likes:47000,url:'https://youtube.com/results?search_query=amazon+kdp+passive+income',thumbnail:''},
@@ -764,6 +764,15 @@ const API = (() => {
       {source:'YouTube',title:'Budget Travel Europe: $50/Day Guide',channel:'NomadLife',views:1700000,likes:74000,url:'https://youtube.com/results?search_query=budget+travel+europe',thumbnail:''},
       {source:'YouTube',title:'How to Make Money on TikTok in 2025',channel:'TikTokGrowth',views:3200000,likes:138000,url:'https://youtube.com/results?search_query=make+money+tiktok+2025',thumbnail:''},
     ];
+    const ids = [
+      'dQw4w9WgXcQ','9bZkp7q19f0','kJQP7kiw5Fk','JGwWNGJdvx8',
+      'fJ9rUzIMcZQ','RgKAFK5djSk','hT_nvWreIhg','OPf0YbXqDm0',
+      'CevxZvSJLk8','YQHsXMglC9A','60ItHLz5WEA','uelHwf8o7_U'
+    ];
+    return demo.map((video, i) => ({
+      ...video,
+      thumbnail: video.thumbnail || `https://i.ytimg.com/vi/${ids[i % ids.length]}/hqdefault.jpg`
+    }));
   }
 
   function getDemoNews() {

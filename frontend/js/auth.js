@@ -128,8 +128,8 @@ const Auth = (() => {
         const title = btn.dataset.title?.toLowerCase();
         if (title && savedTitles.has(title)) {
           btn.classList.add('saved');
-          btn.innerHTML = '?';
           btn.title = 'Saved';
+          btn.setAttribute('aria-label', `Saved ${btn.dataset.title || 'item'}`);
         }
       });
     } catch(e) {}
@@ -147,7 +147,7 @@ const Auth = (() => {
 
   function saveButton({ type = 'topic', title = '', url = '', extra = {}, notes = '' }) {
     const payload = encodeURIComponent(JSON.stringify({ type, title, url, extra, notes }));
-    return `<button class="bookmark-btn" data-title="${escHtml(title)}" data-save="${payload}" onclick="event.stopPropagation();Auth.handleSaveButton(this)" title="Save to My Saves" aria-label="Save ${escHtml(title)}">☆</button>`;
+    return `<button class="bookmark-btn" data-title="${escHtml(title)}" data-save="${payload}" onclick="event.stopPropagation();Auth.handleSaveButton(this)" title="Save to My Saves" aria-label="Save ${escHtml(title)}"><svg viewBox="0 0 24 24" aria-hidden="true"><path class="bookmark-shape" d="M7 4.5h10v15l-5-3.1-5 3.1z"/></svg></button>`;
   }
 
   async function handleSaveButton(btn) {
@@ -166,15 +166,16 @@ const Auth = (() => {
     }
     const original = btn.innerHTML;
     btn.disabled = true;
-    btn.innerHTML = 'Saving...';
+    btn.classList.add('saving');
     try {
       await addSave(item.type, item.title, item.url, item.extra, item.notes);
       btn.classList.add('saved');
-      btn.innerHTML = '★ <span>Saved</span>';
       btn.title = 'Saved';
+      btn.setAttribute('aria-label', `Saved ${btn.dataset.title || 'item'}`);
     } catch(e) {
       btn.disabled = false;
       btn.innerHTML = original;
+      btn.classList.remove('saving');
       showToast(e.message || 'Save failed');
     }
   }

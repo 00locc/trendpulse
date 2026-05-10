@@ -1,7 +1,7 @@
 /* yt-loader.js — overrides loadYouTube in app.js with proper thumbnail support */
 
 function renderYouTubeCard(v) {
-  const thumb = v.thumbnail || '';
+  const thumb = v.thumbnail || thumbnailFromYouTubeUrl(v.url) || '';
   const thumbSection = thumb
     ? '<div class="yt-thumb-wrap"><img src="' + escHtml(thumb) + '" class="yt-thumb" loading="lazy" alt="" onerror="this.parentElement.innerHTML=\'<div class=yt-thumb-ph>&#9654;</div>\'"></div>'
     : '<div class="yt-thumb-ph">&#9654;</div>';
@@ -21,6 +21,11 @@ function renderYouTubeCard(v) {
     + '<div class="yt-stats">' + stats + '</div>'
     + tags
     + '</div></div>';
+}
+
+function thumbnailFromYouTubeUrl(url) {
+  const match = String(url || '').match(/[?&]v=([^&]+)/);
+  return match ? 'https://i.ytimg.com/vi/' + encodeURIComponent(match[1]) + '/hqdefault.jpg' : '';
 }
 
 // Override the loadYouTube function defined in app.js
