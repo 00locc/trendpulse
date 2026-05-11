@@ -350,6 +350,54 @@ def google_callback():
         return redirect('/dashboard?auth=login&auth_error=google_user_failed')
 
 
+@app.route('/api/github/trending', methods=['GET'])
+def github_trending():
+    since = request.args.get('since', 'daily')
+    language = request.args.get('language', '').strip()
+    days = 1 if since == 'daily' else 7
+    created_after = (datetime.utcnow() - timedelta(days=days)).strftime('%Y-%m-%d')
+    query = f'created:>{created_after}'
+    if language:
+        query += f' language:{language}'
+
+    try:
+        res = requests.get(
+            'https://api.github.com/search/repositories',
+            params={
+                'q': query,
+                'sort': 'stars',
+                'order': 'desc',
+                'per_page': 25,
+            },
+            headers={
+                'Accept': 'application/vnd.github+json',
+                'User-Agent': 'TrendPulse',
+            },
+            timeout=10,
+        )
+        res.raise_for_status()
+        repos = []
+        for item in res.json().get('items', []):
+            owner = item.get('owner') or {}
+            repos.append({
+                'source': 'GitHub',
+                'author': owner.get('login') or '',
+                'name': item.get('name') or '',
+                'description': item.get('description') or '',
+                'stars': item.get('stargazers_count') or 0,
+                'starsToday': 0,
+                'language': item.get('language') or 'Unknown',
+                'url': item.get('html_url') or '',
+                'forks': item.get('forks_count') or 0,
+            })
+        if repos:
+            return jsonify(repos)
+    except Exception as e:
+        logging.error(f'GitHub trending error: {e}')
+
+    return jsonify(_demo_github_repos())
+
+
 @app.route('/api/saves', methods=['GET'])
 @token_required
 def get_saves():
@@ -552,6 +600,16 @@ def _demo_trending():
         {'term':'chatgpt prompts','volume':30,'delta':'+55%','rank':8},
         {'term':'print on demand','volume':26,'delta':'+48%','rank':9},
         {'term':'digital products etsy','volume':22,'delta':'+40%','rank':10},
+    ]
+
+def _demo_github_repos():
+    return [
+        {'source':'GitHub','author':'browser-use','name':'browser-use','description':'Make websites accessible for AI agents.','stars':74200,'starsToday':980,'language':'Python','url':'https://github.com/browser-use/browser-use','forks':8400},
+        {'source':'GitHub','author':'microsoft','name':'generative-ai-for-beginners','description':'Lessons for building with generative AI.','stars':91000,'starsToday':720,'language':'Jupyter Notebook','url':'https://github.com/microsoft/generative-ai-for-beginners','forks':47000},
+        {'source':'GitHub','author':'langchain-ai','name':'langchain','description':'Build context-aware reasoning applications.','stars':112000,'starsToday':610,'language':'Python','url':'https://github.com/langchain-ai/langchain','forks':18000},
+        {'source':'GitHub','author':'vercel','name':'next.js','description':'The React framework for production.','stars':129000,'starsToday':420,'language':'JavaScript','url':'https://github.com/vercel/next.js','forks':28000},
+        {'source':'GitHub','author':'supabase','name':'supabase','description':'The open source Firebase alternative.','stars':88000,'starsToday':390,'language':'TypeScript','url':'https://github.com/supabase/supabase','forks':9400},
+        {'source':'GitHub','author':'open-webui','name':'open-webui','description':'User-friendly local AI interface.','stars':94000,'starsToday':360,'language':'JavaScript','url':'https://github.com/open-webui/open-webui','forks':12000},
     ]
 
 # ── START ─────────────────────────────────────────────────────

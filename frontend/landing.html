@@ -5,6 +5,21 @@
   <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
   <title>TrendPulse — Discover What People Want to Buy</title>
   <meta name="description" content="Free trend intelligence for digital product creators. Find what PDFs, ebooks and templates are in demand right now using live data from Google, Reddit, Amazon and Etsy."/>
+  <script>
+    (() => {
+      const token = localStorage.getItem('tp_token');
+      if (!token) return;
+      try {
+        const encoded = (token.split('.')[1] || '').replace(/-/g, '+').replace(/_/g, '/');
+        const payload = JSON.parse(atob(encoded.padEnd(Math.ceil(encoded.length / 4) * 4, '=')));
+        const isExpired = payload.exp && payload.exp * 1000 <= Date.now();
+        if (!isExpired) window.location.replace('/dashboard');
+        else localStorage.removeItem('tp_token');
+      } catch(e) {
+        localStorage.removeItem('tp_token');
+      }
+    })();
+  </script>
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
   <style>

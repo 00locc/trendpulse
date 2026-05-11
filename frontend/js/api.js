@@ -267,17 +267,28 @@ const API = (() => {
   async function getGitHubTrending(language = '', since = 'daily') {
     const cacheKey = 'github_' + language + '_' + since;
     return cachedFetch(cacheKey, async () => {
-      const lang = language ? `language=${encodeURIComponent(language)}&` : '';
-      const res  = await fetchT(`https://gh-trending-api.vercel.app/repositories?${lang}since=${since}`, {}, 8000);
+      const lang = language ? `&language=${encodeURIComponent(language)}` : '';
+      const res  = await fetchT(`${BACKEND}/github/trending?since=${encodeURIComponent(since)}${lang}`, {}, 8000);
       if (!res.ok) throw new Error();
       const data = await res.json();
       if (!Array.isArray(data) || !data.length) throw new Error();
       return data.slice(0,25).map(r => ({
         source:'GitHub', title:`${r.author}/${r.name}`, description:r.description||'',
-        stars:r.stars||0, starsToday:r.currentPeriodStars||0, language:r.language||'Unknown',
+        stars:r.stars||0, starsToday:r.currentPeriodStars||r.starsToday||0, language:r.language||'Unknown',
         url:r.url||`https://github.com/${r.author}/${r.name}`, forks:r.forks||0
       }));
-    }, TTL.github) || [];
+    }, TTL.github) || getGitHubDemoRepos();
+  }
+
+  function getGitHubDemoRepos() {
+    return [
+      { source:'GitHub', title:'browser-use/browser-use', description:'Make websites accessible for AI agents.', stars:74200, starsToday:980, language:'Python', url:'https://github.com/browser-use/browser-use', forks:8400 },
+      { source:'GitHub', title:'microsoft/generative-ai-for-beginners', description:'Lessons for building with generative AI.', stars:91000, starsToday:720, language:'Jupyter Notebook', url:'https://github.com/microsoft/generative-ai-for-beginners', forks:47000 },
+      { source:'GitHub', title:'langchain-ai/langchain', description:'Build context-aware reasoning applications.', stars:112000, starsToday:610, language:'Python', url:'https://github.com/langchain-ai/langchain', forks:18000 },
+      { source:'GitHub', title:'vercel/next.js', description:'The React framework for production.', stars:129000, starsToday:420, language:'JavaScript', url:'https://github.com/vercel/next.js', forks:28000 },
+      { source:'GitHub', title:'supabase/supabase', description:'The open source Firebase alternative.', stars:88000, starsToday:390, language:'TypeScript', url:'https://github.com/supabase/supabase', forks:9400 },
+      { source:'GitHub', title:'open-webui/open-webui', description:'User-friendly local AI interface.', stars:94000, starsToday:360, language:'JavaScript', url:'https://github.com/open-webui/open-webui', forks:12000 },
+    ];
   }
 
   // ── DEV.TO ────────────────────────────────────────────────────────
