@@ -138,34 +138,58 @@
 
     /* ── HERO ── */
     .hero {
-      min-height: 100vh;
+      min-height: 92vh;
       display: flex;
       align-items: center;
       justify-content: center;
       text-align: center;
-      padding: 120px 24px 80px;
+      padding: 120px 24px 70px;
       position: relative;
       overflow: hidden;
+      border-bottom: 1px solid var(--border);
     }
-    .hero-glow {
+    .hero-dashboard-bg {
       position: absolute;
-      top: 20%;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 600px;
-      height: 600px;
-      background: radial-gradient(circle, rgba(0,245,160,0.08) 0%, transparent 70%);
+      inset: 86px 24px 24px;
+      max-width: 1180px;
+      margin: 0 auto;
+      border: 1px solid rgba(255,255,255,0.09);
+      border-radius: 18px;
+      background:
+        linear-gradient(180deg, rgba(7,7,13,0.3), rgba(7,7,13,0.94)),
+        linear-gradient(135deg, rgba(0,245,160,0.10), transparent 34%),
+        linear-gradient(225deg, rgba(77,159,255,0.08), transparent 34%),
+        var(--bg2);
+      box-shadow: 0 28px 90px rgba(0,0,0,0.46);
+      opacity: 0.92;
       pointer-events: none;
     }
-    .hero-glow2 {
+    .hero-dashboard-bg::before {
+      content: '';
       position: absolute;
-      top: 40%;
-      left: 20%;
-      width: 400px;
-      height: 400px;
-      background: radial-gradient(circle, rgba(77,159,255,0.05) 0%, transparent 70%);
-      pointer-events: none;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(255,255,255,0.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.04) 1px, transparent 1px);
+      background-size: 56px 56px;
+      mask-image: linear-gradient(to bottom, rgba(0,0,0,0.7), transparent 80%);
     }
+    .hero-dashboard-bg::after {
+      content: '';
+      position: absolute;
+      left: 32px;
+      right: 32px;
+      bottom: 28px;
+      height: 170px;
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 12px;
+      background:
+        linear-gradient(90deg, rgba(0,245,160,0.18) 0 18%, transparent 18% 21%, rgba(77,159,255,0.16) 21% 44%, transparent 44% 48%, rgba(255,214,10,0.13) 48% 68%, transparent 68% 72%, rgba(255,77,143,0.14) 72% 100%),
+        repeating-linear-gradient(180deg, rgba(255,255,255,0.08) 0 1px, transparent 1px 34px),
+        rgba(15,15,24,0.72);
+      opacity: 0.72;
+    }
+    .hero-content { position: relative; z-index: 1; max-width: 930px; }
     .hero-badge {
       display: inline-flex;
       align-items: center;
@@ -193,11 +217,11 @@
     }
     .hero-title {
       font-family: var(--fd);
-      font-size: clamp(52px, 8vw, 96px);
+      font-size: clamp(58px, 9vw, 116px);
       line-height: 0.95;
       letter-spacing: 2px;
       margin-bottom: 24px;
-      max-width: 900px;
+      text-shadow: 0 24px 70px rgba(0,0,0,0.6);
     }
     .hero-title .accent { color: var(--accent); }
     .hero-title .dim { color: var(--text3); }
@@ -274,6 +298,30 @@
       color: var(--text3);
     }
     .proof-item span { color: var(--accent); font-weight: 600; }
+
+    .showcase-strip {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0,1fr));
+      gap: 10px;
+      max-width: 960px;
+      margin: 0 auto 26px;
+      text-align: left;
+    }
+    .showcase-stat {
+      background: rgba(15,15,24,0.74);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 8px;
+      padding: 12px 14px;
+      backdrop-filter: blur(12px);
+    }
+    .showcase-stat strong {
+      display: block;
+      color: var(--text);
+      font-family: var(--fm);
+      font-size: 15px;
+      margin-bottom: 3px;
+    }
+    .showcase-stat span { color: var(--text2); font-size: 11px; }
 
     /* ── TICKER ── */
     .ticker-wrap {
@@ -359,9 +407,19 @@
     .feature-card:hover { border-color: rgba(255,255,255,0.15); transform: translateY(-4px); }
     .feature-card:hover::before { opacity: 1; }
     .feature-icon {
-      font-size: 28px;
+      width: 36px;
+      height: 36px;
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 8px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--accent-color, var(--accent));
+      background: rgba(255,255,255,0.03);
+      font-family: var(--fm);
+      font-size: 11px;
+      font-weight: 700;
       margin-bottom: 16px;
-      display: block;
     }
     .feature-title {
       font-size: 17px;
@@ -641,6 +699,12 @@
 
     @media (max-width: 640px) {
       nav { padding: 14px 20px; }
+      .nav-cta { gap: 8px; }
+      .nav-cta .btn-ghost:first-child { display: none; }
+      .btn-ghost, .btn-primary { padding: 8px 12px; }
+      .hero { min-height: 88vh; padding-top: 104px; }
+      .hero-dashboard-bg { inset: 72px 10px 14px; border-radius: 12px; }
+      .showcase-strip { grid-template-columns: repeat(2, minmax(0,1fr)); }
       .email-card { padding: 36px 24px; }
       .email-form { flex-direction: column; }
       footer { flex-direction: column; text-align: center; }
@@ -669,18 +733,23 @@
 
 <!-- HERO -->
 <section class="hero">
-  <div class="hero-glow"></div>
-  <div class="hero-glow2"></div>
-  <div>
-    <div class="hero-badge">🔴 Live data · Updated every hour</div>
+  <div class="hero-dashboard-bg"></div>
+  <div class="hero-content">
+    <div class="hero-badge">Live demand signals · Updated hourly</div>
     <h1 class="hero-title">
-      Find What People<br>
-      <span class="accent">Want to Buy</span><br>
-      <span class="dim">Right Now</span>
+      TrendPulse<br>
+      <span class="accent">Find Product Ideas</span><br>
+      <span class="dim">People Already Want</span>
     </h1>
     <p class="hero-sub">
-      Free trend intelligence for <strong>digital product creators</strong>. Discover which ebooks, PDFs and templates are in demand using live signals from Google, Reddit, Amazon and Etsy.
+      A live trend dashboard for <strong>digital product creators</strong>. Spot ebook, PDF, template, and niche ideas using signals from Google, Reddit, GitHub, Amazon, Etsy, YouTube, and more.
     </p>
+    <div class="showcase-strip">
+      <div class="showcase-stat"><strong>32</strong><span>ranked digital product niches</span></div>
+      <div class="showcase-stat"><strong>15+</strong><span>trend and demand sources</span></div>
+      <div class="showcase-stat"><strong>1 click</strong><span>save ideas to your account</span></div>
+      <div class="showcase-stat"><strong>Hourly</strong><span>fresh market signals</span></div>
+    </div>
     <div class="hero-actions">
       <a href="/dashboard?auth=register" class="btn-hero">
         <svg width="16" height="16" viewBox="0 0 20 20" fill="none"><polyline points="2,14 7,9 11,13 16,6 19,8" stroke="#000" stroke-width="2" stroke-linecap="round"/></svg>
@@ -689,9 +758,9 @@
       <a href="/api/auth/google" class="btn-hero-ghost"><svg class="google-mark" aria-hidden="true" viewBox="0 0 18 18"><path fill="#4285F4" d="M17.64 9.2c0-.64-.06-1.25-.16-1.84H9v3.48h4.84a4.14 4.14 0 0 1-1.8 2.72v2.26h2.92c1.7-1.57 2.68-3.88 2.68-6.62z"/><path fill="#34A853" d="M9 18c2.43 0 4.47-.8 5.96-2.18l-2.92-2.26c-.8.54-1.84.86-3.04.86-2.34 0-4.33-1.58-5.04-3.72H.94v2.34A9 9 0 0 0 9 18z"/><path fill="#FBBC05" d="M3.96 10.7A5.4 5.4 0 0 1 3.68 9c0-.59.1-1.16.28-1.7V4.96H.94A9 9 0 0 0 0 9c0 1.45.34 2.82.94 4.04l3.02-2.34z"/><path fill="#EA4335" d="M9 3.58c1.32 0 2.5.45 3.44 1.35l2.58-2.58C13.46.9 11.43 0 9 0A9 9 0 0 0 .94 4.96L3.96 7.3C4.67 5.16 6.66 3.58 9 3.58z"/></svg><span>Continue with Google</span></a>
     </div>
     <div class="hero-proof">
-      <div class="proof-item">✓ <span>100% Free</span> — no credit card</div>
-      <div class="proof-item">✓ <span>15+ sources</span> in one place</div>
-      <div class="proof-item">✓ Updated <span>every hour</span></div>
+      <div class="proof-item"><span>Free to start</span> · no credit card</div>
+      <div class="proof-item"><span>Built for creators</span> · not enterprise noise</div>
+      <div class="proof-item">Save ideas after <span>login</span></div>
     </div>
   </div>
 </section>
@@ -726,33 +795,33 @@
   <p class="section-sub">Stop guessing what to create. Use real demand data to pick products people are already searching for.</p>
   <div class="features-grid">
     <div class="feature-card" style="--accent-color: var(--accent)">
-      <span class="feature-icon">📚</span>
+      <span class="feature-icon">DP</span>
       <div class="feature-title">Digital Products Intelligence</div>
       <div class="feature-desc">32 ranked ebook and PDF niches with live demand scores. See exactly what's selling on Amazon KDP and Etsy right now — with direct links.</div>
       <div class="feature-tag">⭐ Most Popular</div>
     </div>
     <div class="feature-card" style="--accent-color: var(--orange)">
-      <span class="feature-icon">🔥</span>
+      <span class="feature-icon">GT</span>
       <div class="feature-title">Google Trending Searches</div>
       <div class="feature-desc">See what millions of people are searching right now. Catch trends early before they become saturated — directly from Google Trends data.</div>
     </div>
     <div class="feature-card" style="--accent-color: var(--blue)">
-      <span class="feature-icon">💬</span>
+      <span class="feature-icon">QA</span>
       <div class="feature-title">What People Are Asking</div>
       <div class="feature-desc">Real questions from Reddit, Hacker News and Stack Overflow. Every question is a potential PDF or guide topic with proven demand.</div>
     </div>
     <div class="feature-card" style="--accent-color: var(--yellow)">
-      <span class="feature-icon">🛍️</span>
+      <span class="feature-icon">ET</span>
       <div class="feature-title">Etsy Bestseller Data</div>
       <div class="feature-desc">12 top-selling digital product categories on Etsy with monthly sales volumes, trend percentages and price ranges. Know what actually converts.</div>
     </div>
     <div class="feature-card" style="--accent-color: var(--pink)">
-      <span class="feature-icon">📦</span>
+      <span class="feature-icon">AM</span>
       <div class="feature-title">Amazon Demand Signals</div>
       <div class="feature-desc">Amazon bestseller category signals showing where buyers spend money. Align your product with categories that already have proven buyer intent.</div>
     </div>
     <div class="feature-card" style="--accent-color: var(--accent)">
-      <span class="feature-icon">🚨</span>
+      <span class="feature-icon">SA</span>
       <div class="feature-title">Spike Alerts</div>
       <div class="feature-desc">Be the first to know when a topic suddenly surges in interest. Turn breaking trends into digital products before everyone else catches on.</div>
     </div>
@@ -766,49 +835,49 @@
     <h2 class="section-title">Top Niches Right Now</h2>
     <p class="section-sub" style="margin-bottom:0">A snapshot of the demand data inside TrendPulse — updated hourly.</p>
     <div class="niches-grid">
-      <a href="dashboard.html" class="niche-card">
+      <a href="/dashboard" class="niche-card">
         <div class="niche-rank">#1 · AI/Tech</div>
         <div class="niche-name">AI Prompts Collection</div>
         <div class="niche-bar"><div class="niche-fill" style="width:97%;background:#00f5a0"></div></div>
         <div class="niche-signal" style="color:#00f5a0">⚡ VERY HIGH demand · 97/100</div>
       </a>
-      <a href="dashboard.html" class="niche-card">
+      <a href="/dashboard" class="niche-card">
         <div class="niche-rank">#2 · Business</div>
         <div class="niche-name">Passive Income Ideas</div>
         <div class="niche-bar"><div class="niche-fill" style="width:98%;background:#00f5a0"></div></div>
         <div class="niche-signal" style="color:#00f5a0">⚡ VERY HIGH demand · 98/100</div>
       </a>
-      <a href="dashboard.html" class="niche-card">
+      <a href="/dashboard" class="niche-card">
         <div class="niche-rank">#3 · Productivity</div>
         <div class="niche-name">Notion Templates Pack</div>
         <div class="niche-bar"><div class="niche-fill" style="width:94%;background:#00f5a0"></div></div>
         <div class="niche-signal" style="color:#00f5a0">⚡ VERY HIGH demand · 94/100</div>
       </a>
-      <a href="dashboard.html" class="niche-card">
+      <a href="/dashboard" class="niche-card">
         <div class="niche-rank">#4 · Health</div>
         <div class="niche-name">Intermittent Fasting Guide</div>
         <div class="niche-bar"><div class="niche-fill" style="width:93%;background:#4d9fff"></div></div>
         <div class="niche-signal" style="color:#4d9fff">⚡ HIGH demand · 93/100</div>
       </a>
-      <a href="dashboard.html" class="niche-card">
+      <a href="/dashboard" class="niche-card">
         <div class="niche-rank">#5 · AI/Tech</div>
         <div class="niche-name">ChatGPT for Business</div>
         <div class="niche-bar"><div class="niche-fill" style="width:97%;background:#00f5a0"></div></div>
         <div class="niche-signal" style="color:#00f5a0">⚡ VERY HIGH demand · 97/100</div>
       </a>
-      <a href="dashboard.html" class="niche-card">
+      <a href="/dashboard" class="niche-card">
         <div class="niche-rank">#6 · Wellness</div>
         <div class="niche-name">Anxiety & Stress Workbook</div>
         <div class="niche-bar"><div class="niche-fill" style="width:91%;background:#4d9fff"></div></div>
         <div class="niche-signal" style="color:#4d9fff">⚡ HIGH demand · 91/100</div>
       </a>
-      <a href="dashboard.html" class="niche-card">
+      <a href="/dashboard" class="niche-card">
         <div class="niche-rank">#7 · Design</div>
         <div class="niche-name">Canva Design Templates</div>
         <div class="niche-bar"><div class="niche-fill" style="width:91%;background:#4d9fff"></div></div>
         <div class="niche-signal" style="color:#4d9fff">⚡ HIGH demand · 91/100</div>
       </a>
-      <a href="dashboard.html" class="niche-card">
+      <a href="/dashboard" class="niche-card">
         <div class="niche-rank">#8 · Finance</div>
         <div class="niche-name">Budget & Finance Tracker</div>
         <div class="niche-bar"><div class="niche-fill" style="width:89%;background:#4d9fff"></div></div>
@@ -876,7 +945,7 @@
 <div class="email-section fade-up" id="email">
   <div class="email-card">
     <div class="email-glow"></div>
-    <div class="email-title">📬 WEEKLY<br>TREND REPORT</div>
+    <div class="email-title">WEEKLY<br>TREND REPORT</div>
     <p class="email-sub">Every Monday, get the <strong>top 5 trending niches</strong> for digital products — straight to your inbox. Free forever.</p>
     <form class="email-form" onsubmit="handleSubmit(event)">
       <input type="email" class="email-input" id="emailInput" placeholder="your@email.com" required/>
@@ -884,7 +953,7 @@
     </form>
     <p class="email-note">No spam. <strong>Unsubscribe</strong> any time. Sent every Monday morning.</p>
     <div class="email-success" id="emailSuccess">
-      ✅ You're in! Check your inbox Monday for your first trend report.
+      You're in. Check your inbox Monday for your first trend report.
     </div>
   </div>
 </div>
