@@ -24,10 +24,13 @@ app = Flask(__name__, static_folder=FRONTEND_DIR, static_url_path='')
 CORS(app, supports_credentials=True)
 
 # ── ENV VARS ──────────────────────────────────────────────────
-DATABASE_URL = os.environ.get('DATABASE_URL', '')
-JWT_SECRET   = os.environ.get('JWT_SECRET', 'fallback-secret-change-this')
-GOOGLE_CLIENT_ID = os.environ.get('GOOGLE_CLIENT_ID', '')
-GOOGLE_CLIENT_SECRET = os.environ.get('GOOGLE_CLIENT_SECRET', '')
+def clean_env(name, default=''):
+    return os.environ.get(name, default).strip().strip('"').strip("'")
+
+DATABASE_URL = clean_env('DATABASE_URL')
+JWT_SECRET   = clean_env('JWT_SECRET', 'fallback-secret-change-this')
+GOOGLE_CLIENT_ID = clean_env('GOOGLE_CLIENT_ID')
+GOOGLE_CLIENT_SECRET = clean_env('GOOGLE_CLIENT_SECRET')
 
 # ── DATABASE ──────────────────────────────────────────────────
 def get_db():
@@ -527,7 +530,11 @@ def health():
         'db': db_ok,
         'db_error': db_error,
         'db_url_set': bool(DATABASE_URL),
-        'db_url_prefix': DATABASE_URL[:20] + '...' if DATABASE_URL else 'NOT SET'
+        'db_url_prefix': DATABASE_URL[:20] + '...' if DATABASE_URL else 'NOT SET',
+        'google_client_id_set': bool(GOOGLE_CLIENT_ID),
+        'google_client_id_suffix': GOOGLE_CLIENT_ID[-28:] if GOOGLE_CLIENT_ID else 'NOT SET',
+        'google_secret_set': bool(GOOGLE_CLIENT_SECRET),
+        'public_base_url': get_base_url()
     })
 
 def _demo_trends():
@@ -548,8 +555,9 @@ def _demo_trending():
     ]
 
 # ── START ─────────────────────────────────────────────────────
+init_db()
+
 if __name__ == '__main__':
-    init_db()
     port  = int(os.environ.get('PORT', 5000))
     debug = os.environ.get('RAILWAY_ENVIRONMENT') is None
     print(f'\n{"="*50}\n  TrendPulse running on port {port}\n{"="*50}\n')
