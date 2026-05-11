@@ -13,6 +13,10 @@ const State = {
 };
 
 document.addEventListener('DOMContentLoaded', () => {
+  if (!localStorage.getItem('tp_token')) {
+    document.body.classList.add('auth-locked');
+    return;
+  }
   setupNav(); setupTimeRange(); setupSearch(); loadSettings(); updateTimestamp(); loadDashboard();
 });
 
@@ -23,6 +27,11 @@ function setupNav() {
 }
 
 function switchView(view) {
+  if (typeof Auth !== 'undefined' && !Auth.isLoggedIn()) {
+    document.body.classList.add('auth-locked');
+    Auth.showAuthModal('register');
+    return;
+  }
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
   document.querySelector(`[data-view="${view}"]`)?.classList.add('active');
   document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));

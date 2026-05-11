@@ -21,6 +21,7 @@ const Auth = (() => {
         const data = await res.json();
         if (data.user) {
           currentUser = data.user;
+          unlockDashboard();
           updateNav(true);
           return;
         }
@@ -30,7 +31,10 @@ const Auth = (() => {
       localStorage.removeItem('tp_token');
     }
     updateNav(false);
-    handleAuthQueryParams();
+    const requestedMode = handleAuthQueryParams();
+    if (isDashboardPage()) {
+      lockDashboard(requestedMode || 'register');
+    }
   }
 
   // ── AUTH CALLS ────────────────────────────────────────────
@@ -45,7 +49,9 @@ const Auth = (() => {
     authToken   = data.token;
     currentUser = data.user;
     localStorage.setItem('tp_token', authToken);
+    unlockDashboard();
     updateNav(true);
+    bootDashboard();
     return data;
   }
 
@@ -60,7 +66,9 @@ const Auth = (() => {
     authToken   = data.token;
     currentUser = data.user;
     localStorage.setItem('tp_token', authToken);
+    unlockDashboard();
     updateNav(true);
+    bootDashboard();
     return data;
   }
 
@@ -79,6 +87,29 @@ const Auth = (() => {
   function getUser()  { return currentUser; }
   function getToken() { return authToken; }
   function isLoggedIn() { return !!currentUser; }
+
+  function isDashboardPage() {
+    return window.location.pathname === '/dashboard' || window.location.pathname.endsWith('/index.html');
+  }
+
+  function lockDashboard(mode = 'register') {
+    document.body.classList.add('auth-locked');
+    showAuthModal(mode);
+  }
+
+  function unlockDashboard() {
+    document.body.classList.remove('auth-locked');
+  }
+
+  function bootDashboard() {
+    if (!isDashboardPage()) return;
+    if (typeof setupNav === 'function') setupNav();
+    if (typeof setupTimeRange === 'function') setupTimeRange();
+    if (typeof setupSearch === 'function') setupSearch();
+    if (typeof loadSettings === 'function') loadSettings();
+    if (typeof updateTimestamp === 'function') updateTimestamp();
+    if (typeof loadDashboard === 'function') loadDashboard();
+  }
 
   // ── SAVES ─────────────────────────────────────────────────
   async function getSaves() {
@@ -217,9 +248,14 @@ const Auth = (() => {
     if (mode || err) {
       window.history.replaceState({}, document.title, window.location.pathname);
     }
+    return mode === 'login' || mode === 'register' ? mode : '';
   }
 
   function hideAuthModal() {
+    if (document.body.classList.contains('auth-locked')) {
+      window.location.href = '/';
+      return;
+    }
     const modal = document.getElementById('authModal');
     if (modal) modal.classList.remove('open');
     clearAuthError();

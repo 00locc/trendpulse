@@ -29,6 +29,8 @@
     .auth-error{padding:10px 14px;background:rgba(255,77,143,0.1);border:1px solid rgba(255,77,143,0.3);border-radius:8px;color:#ff4d8f;font-size:13px;margin-bottom:14px;display:none}
     .auth-switch{text-align:center;font-size:13px;color:var(--text2);margin-top:14px}
     .auth-switch a{color:var(--accent);text-decoration:none;font-weight:600}
+    body.auth-locked .sidebar,body.auth-locked .main{filter:blur(8px);pointer-events:none;user-select:none}
+    body.auth-locked .modal-overlay{backdrop-filter:blur(16px)}
   </style>
 </head>
 <body>
